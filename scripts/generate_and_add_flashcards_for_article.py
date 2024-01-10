@@ -1,3 +1,4 @@
+from inspect import getframeinfo, stack
 import argparse
 import json
 import os
@@ -15,6 +16,15 @@ load_dotenv()
 
 
 client = instructor.patch(OpenAI())
+_DEBUG = False
+
+
+def dprint(*args, **kwargs):
+    global _DEBUG
+    caller = getframeinfo(stack()[1][0])
+    callinfo = "%s:%d" % (caller.filename, caller.lineno)
+    if _DEBUG:
+        print(f"DEBUG({callinfo}):", *args, **kwargs)
 
 
 class ChineseFlashcard(pydantic.BaseModel):
@@ -41,10 +51,11 @@ def generate_flashcards(text):
     """
 
     try:
+        message_content = _PROMPT_TMPL.format(text)
         flashcards: ChineseFlashcards = client.chat.completions.create(
             model="gpt-3.5-turbo",
             response_model=ChineseFlashcards,
-            messages=[{"role": "user", "content": _PROMPT_TMPL.format(text)}],
+            messages=[{"role": "user", "content": message_content}],
         )
         return flashcards
     except Exception as e:
@@ -179,11 +190,16 @@ def add_flashcard_to_anki(deck_name: str, flashcard: ChineseFlashcard):
 def main():
     parser = argparse.ArgumentParser(description="Generate flashcards from an article.")
     parser.add_argument("article_path", type=str, help="Path to the article file")
+    parser.add_argument("--debug", action="store_true", help="Turn on extra debugging")
 
     args = parser.parse_args()
 
+    global _DEBUG
+    _DEBUG = args.debug
+
     try:
         flashcards_container = generate_flashcards_from_article(args.article_path)
+        dprint(flashcards_container)
         flashcards = flashcards_container.flashcards
         print(f"Generated {len(flashcards)} flashcards for the following words:")
         for f in flashcards:
