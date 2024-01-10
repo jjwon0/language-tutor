@@ -1,0 +1,5 @@
+instructor==0.4.6
+openai==1.7.0
+pydantic==2.5.3
+PyYAML==6.0.1
+Requests==2.31.0
