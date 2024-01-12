@@ -6,9 +6,9 @@ import instructor
 import pydantic
 from openai import OpenAI
 
-from tutor import utils
-from tutor.anki import AnkiConnectClient
-from tutor.utils import dprint
+from tutor.utils import logging
+from tutor.utils.anki import AnkiConnectClient
+from tutor.utils.logging import dprint
 
 
 class ChineseFlashcard(pydantic.BaseModel):
@@ -77,7 +77,7 @@ def generate_flashcards_from_article(article_path):
 def generate_flashcards_from_article_inner(article_path: str, debug: bool):
     ankiconnect_client = AnkiConnectClient()
 
-    utils._DEBUG = debug
+    logging._DEBUG = debug
 
     try:
         flashcards_container = generate_flashcards_from_article(article_path)
