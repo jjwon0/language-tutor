@@ -42,6 +42,9 @@ def generate_flashcards(text):
             model="gpt-3.5-turbo",
             response_model=ChineseFlashcards,
             messages=[{"role": "user", "content": message_content}],
+            # try to make sure the suggested flashcards are slightly more deterministic
+            temperature=0.2,
+            seed=69,
         )
         return flashcards
     except Exception as e:
