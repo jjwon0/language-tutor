@@ -1,11 +1,3 @@
-# script preamble to access shared modules
-import sys
-from pathlib import Path
-
-root_lib_dir = Path(__file__).parent.parent
-sys.path.append(str(root_lib_dir))
-
-import argparse
 import os
 
 import yaml
@@ -14,16 +6,9 @@ import instructor
 import pydantic
 from openai import OpenAI
 
-from dotenv import load_dotenv
-
 from tutor import utils
 from tutor.anki import AnkiConnectClient
 from tutor.utils import dprint
-
-load_dotenv()
-
-
-openai_client = instructor.patch(OpenAI())
 
 
 class ChineseFlashcard(pydantic.BaseModel):
@@ -48,6 +33,8 @@ def generate_flashcards(text):
     :param text: The text from which to generate flashcards.
     :return: Generated flashcard content.
     """
+
+    openai_client = instructor.patch(OpenAI())
 
     try:
         message_content = _PROMPT_TMPL.format(text)
@@ -77,10 +64,9 @@ def generate_flashcards_from_article(article_path):
             f"The specified article path does not exist: {article_path}"
         )
 
-    with open("articles/2023年五大健康趋势.yaml") as f:
+    with open(article_path) as f:
         article = yaml.safe_load(f)
 
-    # TODO: skip the [0]
     article_text = article["content"].split("\n")[0]
 
     flashcards = generate_flashcards(article_text)
@@ -88,20 +74,13 @@ def generate_flashcards_from_article(article_path):
     return flashcards
 
 
-ankiconnect_client = AnkiConnectClient()
+def generate_flashcards_from_article_inner(article_path: str, debug: bool):
+    ankiconnect_client = AnkiConnectClient()
 
-
-def main():
-    parser = argparse.ArgumentParser(description="Generate flashcards from an article.")
-    parser.add_argument("article_path", type=str, help="Path to the article file")
-    parser.add_argument("--debug", action="store_true", help="Turn on extra debugging")
-
-    args = parser.parse_args()
-
-    utils._DEBUG = args.debug
+    utils._DEBUG = debug
 
     try:
-        flashcards_container = generate_flashcards_from_article(args.article_path)
+        flashcards_container = generate_flashcards_from_article(article_path)
         dprint(flashcards_container)
         flashcards = flashcards_container.flashcards
         print(f"Generated {len(flashcards)} flashcards for the following words:")
@@ -118,7 +97,3 @@ def main():
                 print(" - added!")
     except Exception as e:
         print(f"An error occurred: {e}")
-
-
-if __name__ == "__main__":
-    main()
