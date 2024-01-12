@@ -2,7 +2,10 @@ import click
 
 from dotenv import load_dotenv
 
-from tutor.commands.generate_topics import generate_topics_inner
+from tutor.commands.generate_topics import (
+    generate_topics_prompt_inner,
+    select_conversation_topic_inner,
+)
 from tutor.commands.generate_flashcards_from_article import (
     generate_flashcards_from_article_inner,
 )
@@ -22,8 +25,25 @@ def cli():
     help="Path to data file with past topics",
     default="data/conversation_topics.yaml",
 )
-def generate_topics(conversation_topics_path: str):
-    click.echo(generate_topics_inner(conversation_topics_path))
+@click.option(
+    "--num-topics",
+    type=int,
+    help="Number of new topics to generate",
+    default=10,
+)
+def generate_topics_prompt(conversation_topics_path: str, num_topics: int):
+    click.echo(generate_topics_prompt_inner(conversation_topics_path, num_topics))
+
+
+@cli.command()
+@click.option(
+    "--conversation-topics-path",
+    type=str,
+    help="Path to data file with past topics",
+    default="data/conversation_topics.yaml",
+)
+def select_conversation_topic(conversation_topics_path: str):
+    click.echo(select_conversation_topic_inner(conversation_topics_path))
 
 
 @cli.command()
