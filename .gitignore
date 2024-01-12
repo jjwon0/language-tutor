@@ -1,4 +1,5 @@
 .env
-articles/
+data/
 scratch/
 TODO.md
+__pycache__/

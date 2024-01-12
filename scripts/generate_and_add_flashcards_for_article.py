@@ -1,3 +1,10 @@
+# script preamble to access shared modules
+import sys
+from pathlib import Path
+
+root_lib_dir = Path(__file__).parent.parent
+sys.path.append(str(root_lib_dir))
+
 import argparse
 import os
 
