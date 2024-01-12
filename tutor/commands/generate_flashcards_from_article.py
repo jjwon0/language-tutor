@@ -23,7 +23,18 @@ class ChineseFlashcards(pydantic.BaseModel):
     flashcards: List[ChineseFlashcard]
 
 
-_PROMPT_TMPL = "Below is a paragraph in Chinese. If there are any, please list key vocabulary or grammar phrases for an intermediate/upper-intermediate Chinese learner.\n\n{}"
+_PROMPT_TMPL = """Below the line is an article in Chinese: identify and extract key vocabulary and grammar phrases. For each identified item, generate a flashcard that includes the following information:
+
+- Word/Phrase in Simplified Chinese: Extract the word or phrase from the article.
+- Pinyin: Provide the Pinyin transliteration of the Chinese word or phrase.
+- English Translation: Translate the word or phrase into English.
+- Sample Usage in Chinese: Create or find a sentence from the article (or construct a new one) that uses the word or phrase in context.
+- Sample Usage in English: Translate the sample usage sentence into English, ensuring that it reflects the usage of the word or phrase in context.
+
+For each flashcard, focus on clarity and practical usage, ensuring the information is useful for an intermediate Chinese speaker looking to improve vocabulary and understanding of grammar.
+--
+{text}
+"""
 
 
 def generate_flashcards(text):
@@ -37,9 +48,10 @@ def generate_flashcards(text):
     openai_client = instructor.patch(OpenAI())
 
     try:
-        message_content = _PROMPT_TMPL.format(text)
+        message_content = _PROMPT_TMPL.format(text=text)
+        dprint(message_content)
         flashcards: ChineseFlashcards = openai_client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo-1106",
             response_model=ChineseFlashcards,
             messages=[{"role": "user", "content": message_content}],
             # try to make sure the suggested flashcards are slightly more deterministic
@@ -70,10 +82,8 @@ def generate_flashcards_from_article(article_path):
     with open(article_path) as f:
         article = yaml.safe_load(f)
 
-    article_text = article["content"].split("\n")[0]
-
+    article_text = article["content"]
     flashcards = generate_flashcards(article_text)
-
     return flashcards
 
 
