@@ -1,5 +1,3 @@
-from inspect import getframeinfo, stack
-
 from enum import Enum
 import argparse
 import json
@@ -14,18 +12,13 @@ from openai import OpenAI
 
 from dotenv import load_dotenv
 
+from tutor import utils
+from tutor.utils import dprint
+
 load_dotenv()
 
 
 openai_client = instructor.patch(OpenAI())
-_DEBUG = False
-
-
-def dprint(*args, **kwargs):
-    caller = getframeinfo(stack()[1][0])
-    callinfo = "%s:%d" % (caller.filename, caller.lineno)
-    if _DEBUG:
-        print(f"DEBUG({callinfo}):", *args, **kwargs)
 
 
 class ChineseFlashcard(pydantic.BaseModel):
@@ -181,8 +174,7 @@ def main():
 
     args = parser.parse_args()
 
-    global _DEBUG
-    _DEBUG = args.debug
+    utils._DEBUG = args.debug
 
     try:
         flashcards_container = generate_flashcards_from_article(args.article_path)
