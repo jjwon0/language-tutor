@@ -66,7 +66,7 @@ def scrape_chatgpt_messages(share_link):
     return messages
 
 
-_PROMPT_TMPL = """Below the line is a conversation between a language learner and a LLM assistant in Chinese. Identify and extract key vocabulary and grammar phrases from the LLM's responses. For each identified item, generate a flashcard that includes the following information:
+_PROMPT_TMPL = """Below the line is a conversation between a language learner and a LLM assistant in Chinese. Identify and extract key vocabulary and grammar phrases from the LLM's responses, ignoring proper nouns. For each identified item, generate a flashcard that includes the following information:
 
 - Word/Phrase in Simplified Chinese: Extract the word or phrase from the article.
 - Pinyin: Provide the Pinyin transliteration of the Chinese word or phrase.

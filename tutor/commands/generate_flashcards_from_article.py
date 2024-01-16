@@ -9,7 +9,7 @@ from tutor.llm_flashcards import (
 )
 
 
-_PROMPT_TMPL = """Below the line is an article in Chinese: identify and extract key vocabulary and grammar phrases. For each identified item, generate a flashcard that includes the following information:
+_PROMPT_TMPL = """Below the line is an article in Chinese: identify and extract key vocabulary and grammar phrases, ignoring proper nouns. For each identified item, generate a flashcard that includes the following information:
 
 - Word/Phrase in Simplified Chinese: Extract the word or phrase from the article.
 - Pinyin: Provide the Pinyin transliteration of the Chinese word or phrase.
