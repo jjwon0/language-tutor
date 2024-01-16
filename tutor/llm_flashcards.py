@@ -35,7 +35,7 @@ def generate_flashcards(text):
             response_model=ChineseFlashcards,
             messages=[{"role": "user", "content": text}],
             # try to make sure the suggested flashcards are slightly more deterministic
-            temperature=0.2,
+            temperature=0.1,
             seed=69,
         )
         return flashcards
