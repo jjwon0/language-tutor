@@ -12,13 +12,16 @@ from tutor.commands.generate_flashcards_from_article import (
 from tutor.commands.generate_flashcards_from_chatgpt import (
     generate_flashcards_from_chatgpt_inner,
 )
+from tutor.utils.logging import set_debug
 
 load_dotenv()
 
 
 @click.group()
-def cli():
+@click.option("--debug", is_flag=True, help="Turn on extra debug logging")
+def cli(debug: bool):
     """chinese-tutor tool"""
+    set_debug(debug)
 
 
 @cli.command()
@@ -51,13 +54,11 @@ def select_conversation_topic(conversation_topics_path: str):
 
 @cli.command()
 @click.argument("article-path", type=click.Path(exists=True))
-@click.option("--debug", is_flag=True, help="Turn on extra debug logging")
-def generate_flashcards_from_article(article_path: str, debug: bool):
-    click.echo(generate_flashcards_from_article_inner(article_path, debug))
+def generate_flashcards_from_article(article_path: str):
+    click.echo(generate_flashcards_from_article_inner(article_path))
 
 
 @cli.command()
 @click.argument("chatgpt-share-link", type=str)
-@click.option("--debug", is_flag=True, help="Turn on extra debug logging")
-def generate_flashcards_from_chatgpt(chatgpt_share_link: str, debug: bool):
-    click.echo(generate_flashcards_from_chatgpt_inner(chatgpt_share_link, debug))
+def generate_flashcards_from_chatgpt(chatgpt_share_link: str):
+    click.echo(generate_flashcards_from_chatgpt_inner(chatgpt_share_link))

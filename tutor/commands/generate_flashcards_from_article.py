@@ -1,6 +1,5 @@
 import yaml
 
-from tutor.utils import logging
 from tutor.utils.anki import AnkiConnectClient, get_subdeck
 from tutor.llm_flashcards import (
     generate_flashcards,
@@ -23,9 +22,7 @@ For each flashcard, focus on clarity and practical usage, ensuring the informati
 """
 
 
-def generate_flashcards_from_article_inner(article_path: str, debug: bool):
-    logging._DEBUG = debug
-
+def generate_flashcards_from_article_inner(article_path: str):
     with open(article_path) as f:
         article = yaml.safe_load(f)
 

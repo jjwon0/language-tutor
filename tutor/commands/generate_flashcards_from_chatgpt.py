@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 
 import pydantic
 
-from tutor.utils import logging
 from tutor.llm_flashcards import (
     generate_flashcards,
     maybe_add_flashcards,
@@ -80,8 +79,7 @@ For each flashcard, focus on clarity and practical usage, ensuring the informati
 """
 
 
-def generate_flashcards_from_chatgpt_inner(chatgpt_share_link, debug):
-    logging._DEBUG = debug
+def generate_flashcards_from_chatgpt_inner(chatgpt_share_link: str):
     messages = scrape_chatgpt_messages(chatgpt_share_link)
     conversation_parts = []
     for m in messages:
