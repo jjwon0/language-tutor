@@ -40,6 +40,7 @@ def generate_flashcards(text):
             temperature=0.1,
             seed=69,
         )
+        dprint(flashcards._raw_response.usage)
         return flashcards
     except Exception as e:
         print("Error generating flashcards:", e)
