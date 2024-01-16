@@ -18,7 +18,7 @@ _PROMPT_TMPL = """Generate the following for the word/phrase {word}:
 """
 
 
-def generate_flashcard_from_word_inner(word: str, deck: str):
+def generate_flashcard_from_word_inner(deck: str, word: str):
     ankiconnect_client = AnkiConnectClient()
     if ankiconnect_client.find_cards(get_word_exists_query(word)):
         print("Card exists already!")
