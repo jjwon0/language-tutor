@@ -83,3 +83,7 @@ class AnkiConnectClient:
             "tags": [],
         }
         return self.send_request(AnkiAction.ADD_NOTE, {"note": note})
+
+
+def get_subdeck(base_deck_name: str, subdeck_name: str):
+    return f"{base_deck_name}::{subdeck_name}"
