@@ -12,6 +12,9 @@ from tutor.commands.generate_flashcards_from_article import (
 from tutor.commands.generate_flashcards_from_chatgpt import (
     generate_flashcards_from_chatgpt_inner,
 )
+from tutor.commands.generate_flashcard_from_word import (
+    generate_flashcard_from_word_inner,
+)
 from tutor.utils.logging import set_debug
 
 load_dotenv()
@@ -66,3 +69,11 @@ def generate_flashcards_from_article(article_path: str):
 def generate_flashcards_from_chatgpt(chatgpt_share_link: str):
     """Generates new Anki flashcards from the ChatGPT conversation at CHATGPT_SHARE_LINK."""
     click.echo(generate_flashcards_from_chatgpt_inner(chatgpt_share_link))
+
+
+@cli.command()
+@click.argument("word", type=str)
+@click.argument("deck", type=str)
+def generate_flashcard_from_word(word: str, deck: str):
+    """Add a new Anki flashcard for a specific WORD to DECK."""
+    click.echo(generate_flashcard_from_word_inner(word, deck))

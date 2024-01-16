@@ -46,19 +46,14 @@ class AnkiConnectClient:
         """
         return self.send_request(AnkiAction.CARDS_INFO, {"cards": card_ids})
 
-    def maybe_get_card_details(self, text, deck_name):
+    def find_cards(self, query):
         """
-        Check if a card with the specified front content exists in the given deck.
+        Get card IDs for a specific Anki query.
 
-        :param text: The content on the front side of the card to check.
-        :param deck_name: The name of the deck to search in.
+        :param query: The Anki query.
         :return: True if the card exists, False otherwise.
         """
-        card_ids = self.send_request(
-            AnkiAction.FIND_CARDS, {"query": f'deck:"{deck_name}" "{text}"'}
-        )
-        if card_ids:
-            return self.get_card_details(card_ids)
+        return self.send_request(AnkiAction.FIND_CARDS, {"query": query})
 
     def add_flashcard(self, deck_name, flashcard):
         """
