@@ -8,6 +8,8 @@ class AnkiAction(Enum):
     ADD_NOTE = "addNote"
     CARDS_INFO = "cardsInfo"
     FIND_CARDS = "findCards"
+    DECK_NAMES = "deckNames"
+    CREATE_DECK = "createDeck"
 
 
 class AnkiConnectClient:
@@ -83,6 +85,17 @@ class AnkiConnectClient:
             "tags": [],
         }
         return self.send_request(AnkiAction.ADD_NOTE, {"note": note})
+
+    def list_decks(self):
+        return self.send_request(AnkiAction.DECK_NAMES)
+
+    def add_deck(self, deck_name):
+        return self.send_request(AnkiAction.CREATE_DECK, {"deck": deck_name})
+
+    def maybe_add_deck(self, deck_name):
+        decks = self.list_decks()
+        if deck_name not in decks:
+            return self.add_deck(deck_name)
 
 
 def get_subdeck(base_deck_name: str, subdeck_name: str):

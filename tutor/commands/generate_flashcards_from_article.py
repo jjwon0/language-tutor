@@ -1,9 +1,11 @@
 import yaml
 
 from tutor.utils import logging
+from tutor.utils.anki import AnkiConnectClient, get_subdeck
 from tutor.llm_flashcards import (
     generate_flashcards,
     maybe_add_flashcards,
+    DEFAULT_DECK,
 )
 
 
@@ -29,6 +31,10 @@ def generate_flashcards_from_article_inner(article_path: str, debug: bool):
 
     article_title = article["article"]["title"]
     article_text = article["content"]
+
+    ankiconnect_client = AnkiConnectClient()
+    ankiconnect_client.maybe_add_deck(get_subdeck(DEFAULT_DECK, article_title))
+
     flashcards = generate_flashcards(article_text)
     print(f"Generated {len(flashcards.flashcards)} flashcards for the following words:")
     maybe_add_flashcards(flashcards, article_title)
