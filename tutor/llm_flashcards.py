@@ -9,7 +9,7 @@ from tutor.utils.anki import AnkiConnectClient, get_subdeck
 class ChineseFlashcard(BaseModel):
     word: str
     pinyin: str = Field("The word romanized using Pinyin")
-    sample_usage: str = Field("Example usage of the word which contextualizes it")
+    sample_usage: str = Field("Example sentence with the word which contextualizes it")
     english: str = Field("The word translated into English")
     sample_usage_english: str = Field(
         description="The sample usage field translated to English"
