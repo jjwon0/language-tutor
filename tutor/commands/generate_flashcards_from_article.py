@@ -35,6 +35,7 @@ def generate_flashcards_from_article_inner(article_path: str, debug: bool):
     ankiconnect_client = AnkiConnectClient()
     ankiconnect_client.maybe_add_deck(get_subdeck(DEFAULT_DECK, article_title))
 
-    flashcards = generate_flashcards(article_text)
+    prompt = _PROMPT_TMPL.format(text=article_text)
+    flashcards = generate_flashcards(prompt)
     print(f"Generated {len(flashcards.flashcards)} flashcards for the following words:")
     maybe_add_flashcards(flashcards, article_title)
