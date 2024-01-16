@@ -36,8 +36,7 @@ def generate_flashcards(text):
             model="gpt-3.5-turbo-1106",
             response_model=ChineseFlashcards,
             messages=[{"role": "user", "content": text}],
-            # try to make sure the suggested flashcards are slightly more deterministic
-            temperature=0.1,
+            # try to make sure the suggested flashcards are a bit more deterministic
             seed=69,
         )
         dprint(flashcards._raw_response.usage)
