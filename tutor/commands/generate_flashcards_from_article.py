@@ -9,7 +9,7 @@ from tutor.llm_flashcards import (
 )
 
 
-_PROMPT_TMPL = """Below the line is an article in Chinese: identify and extract key vocabulary and grammar phrases, ignoring proper nouns. For each identified item, generate a flashcard that includes the following information:
+_PROMPT_TMPL = """Below the line is a paragraph from an article in Chinese: identify and extract key vocabulary and grammar phrases, ignoring proper nouns. For each identified item, generate a flashcard that includes the following information:
 
 - Word/Phrase in Simplified Chinese: Extract the word or phrase from the article.
 - Pinyin: Provide the Pinyin transliteration of the Chinese word or phrase.
@@ -35,7 +35,10 @@ def generate_flashcards_from_article_inner(article_path: str, debug: bool):
     ankiconnect_client = AnkiConnectClient()
     ankiconnect_client.maybe_add_deck(get_subdeck(DEFAULT_DECK, article_title))
 
-    prompt = _PROMPT_TMPL.format(text=article_text)
-    flashcards = generate_flashcards(prompt)
-    print(f"Generated {len(flashcards.flashcards)} flashcards for the following words:")
-    maybe_add_flashcards(flashcards, article_title)
+    for paragraph in article_text.split("\n"):
+        prompt = _PROMPT_TMPL.format(text=paragraph)
+        flashcards = generate_flashcards(prompt)
+        print(
+            f"Generated {len(flashcards.flashcards)} flashcards for the following words:"
+        )
+        maybe_add_flashcards(flashcards, article_title)
