@@ -1,20 +1,22 @@
 from typing import List
 import instructor
-import pydantic
+from pydantic import BaseModel, Field
 from openai import OpenAI
 from tutor.utils.logging import dprint
 from tutor.utils.anki import AnkiConnectClient, get_subdeck
 
 
-class ChineseFlashcard(pydantic.BaseModel):
+class ChineseFlashcard(BaseModel):
     word: str
-    pinyin: str
-    sample_usage: str
-    english: str
-    sample_usage_english: str
+    pinyin: str = Field("The word romanized using Pinyin")
+    sample_usage: str = Field("Example usage of the word which contextualizes it")
+    english: str = Field("The word translated into English")
+    sample_usage_english: str = Field(
+        description="The sample usage field translated to English"
+    )
 
 
-class ChineseFlashcards(pydantic.BaseModel):
+class ChineseFlashcards(BaseModel):
     flashcards: List[ChineseFlashcard]
 
 
