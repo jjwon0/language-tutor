@@ -7,10 +7,10 @@ from tutor.utils.anki import AnkiConnectClient, get_subdeck
 
 
 class ChineseFlashcard(BaseModel):
-    word: str
-    pinyin: str = Field("The word romanized using Pinyin")
+    word: str = Field("The word/phrase in simplified Chinese")
+    pinyin: str = Field("The word romanized using Pinyin (lowercased)")
+    english: str = Field("The word translated into English (lowercased)")
     sample_usage: str = Field("Example sentence with the word which contextualizes it")
-    english: str = Field("The word translated into English")
     sample_usage_english: str = Field(
         description="The sample usage field translated to English"
     )
