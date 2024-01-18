@@ -8,7 +8,7 @@ from tutor.llm_flashcards import (
 from tutor.utils.logging import dprint
 
 
-_PROMPT_TMPL = """Generate the following for the word/phrase {word}:
+_PROMPT_TMPL = """Generate only the following items for the word/phrase: {word}:
 
 - Word/phrase: Repeat the word/phrase verbatim.
 - Pinyin: Provide the Pinyin transliteration of the Chinese word or phrase.
