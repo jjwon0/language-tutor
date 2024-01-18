@@ -36,6 +36,8 @@ def generate_flashcards(text):
             model="gpt-3.5-turbo-1106",
             response_model=ChineseFlashcards,
             messages=[{"role": "user", "content": text}],
+            # don't retry: it does not seem to work that well
+            max_retries=0,
             # try to make sure the suggested flashcards are a bit more deterministic
             seed=69,
         )
