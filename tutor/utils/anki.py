@@ -10,6 +10,8 @@ class AnkiAction(Enum):
     FIND_CARDS = "findCards"
     DECK_NAMES = "deckNames"
     CREATE_DECK = "createDeck"
+    DELETE_CARDS = "deleteCards"
+    UPDATE_NOTE_FIELDS = "updateNoteFields"
 
 
 class AnkiConnectClient:
@@ -80,6 +82,25 @@ class AnkiConnectClient:
             "tags": [],
         }
         return self.send_request(AnkiAction.ADD_NOTE, {"note": note})
+
+    def delete_flashcards(self, card_ids):
+        return self.send_request(AnkiAction.DELETE_CARDS, {"cards": card_ids})
+
+    def update_flashcard(self, note_id, flashcard):
+        payload = {
+            "note": {
+                "id": note_id,
+                # update everything except the Chinese "id"
+                "fields": {
+                    "Chinese": flashcard.word,
+                    "Pinyin": flashcard.pinyin,
+                    "English": flashcard.english,
+                    "Sample Usage": flashcard.sample_usage,
+                    "Sample Usage (English)": flashcard.sample_usage_english,
+                },
+            }
+        }
+        return self.send_request(AnkiAction.UPDATE_NOTE_FIELDS, payload)
 
     def list_decks(self):
         return self.send_request(AnkiAction.DECK_NAMES)

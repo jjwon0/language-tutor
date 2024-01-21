@@ -15,6 +15,15 @@ class ChineseFlashcard(BaseModel):
         description="The sample usage field translated to English"
     )
 
+    def __str__(self):
+        return f"""
+Word: {self.word}
+Pinyin: {self.pinyin}
+English: {self.english}
+Sample Usage: {self.sample_usage}
+Sample Usage (English): {self.sample_usage_english}
+        """.strip()
+
 
 class ChineseFlashcards(BaseModel):
     flashcards: List[ChineseFlashcard]
