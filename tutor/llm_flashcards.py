@@ -79,9 +79,10 @@ def maybe_add_flashcards_to_deck(
         else:
             dprint(" - new card!")
             ankiconnect_client.add_flashcard(deck, f)
+            print(f)
             dprint(" - added!")
             num_added += 1
-    print(f"Added {num_added} new cards!")
+    print(f"Added {num_added} new card(s)!")
 
 
 def maybe_add_flashcards(flashcards_container: ChineseFlashcards, subdeck: str):

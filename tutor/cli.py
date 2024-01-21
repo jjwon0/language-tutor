@@ -24,7 +24,7 @@ load_dotenv()
 
 
 @click.group()
-@click.option("--debug", is_flag=True, help="Turn on extra debug logging")
+@click.option("--debug/--no-debug", default=False, help="Turn on extra debug logging")
 def cli(debug: bool):
     """chinese-tutor tool"""
     set_debug(debug)
