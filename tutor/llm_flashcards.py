@@ -24,6 +24,18 @@ Sample Usage: {self.sample_usage}
 Sample Usage (English): {self.sample_usage_english}
         """.strip()
 
+    @classmethod
+    def from_anki_json(cls, anki_json):
+        fields = anki_json["fields"]
+        instance = cls(
+            word=fields["Chinese"]["value"],
+            pinyin=fields["Pinyin"]["value"],
+            english=fields["English"]["value"],
+            sample_usage=fields["Sample Usage"]["value"],
+            sample_usage_english=fields["Sample Usage (English)"]["value"],
+        )
+        return instance
+
 
 class ChineseFlashcards(BaseModel):
     flashcards: List[ChineseFlashcard]
