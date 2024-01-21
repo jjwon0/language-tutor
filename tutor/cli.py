@@ -18,7 +18,11 @@ from tutor.commands.generate_flashcard_from_word import (
 from tutor.commands.regenerate_flashcard import (
     regenerate_flashcard_inner,
 )
+from tutor.commands.list_lesser_known_cards import (
+    list_lesser_known_cards_inner,
+)
 from tutor.utils.logging import set_debug
+from tutor.llm_flashcards import DEFAULT_DECK
 
 load_dotenv()
 
@@ -87,3 +91,11 @@ def generate_flashcard_from_word(deck: str, word: str):
 def regenerate_flashcard(word: str):
     """Regenerate Anki flashcard for a specific WORD."""
     click.echo(regenerate_flashcard_inner(word))
+
+
+@cli.command()
+@click.option("--deck", type=str, default=DEFAULT_DECK)
+@click.option("--count", type=int, default=5)
+def list_lesser_known_cards(deck: str, count: int):
+    """Regenerate Anki flashcard for a specific WORD."""
+    click.echo(list_lesser_known_cards_inner(deck, count))
