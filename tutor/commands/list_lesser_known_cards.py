@@ -1,6 +1,6 @@
 import random
 from tutor.utils.anki import AnkiConnectClient
-from tutor.llm_flashcards import ChineseFlashcard
+from tutor.llm.models import ChineseFlashcard
 from tutor.utils.logging import dprint
 
 
