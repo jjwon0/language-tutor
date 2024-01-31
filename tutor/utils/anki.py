@@ -40,35 +40,12 @@ class AnkiConnectClient:
         return result.get("result")
 
     def get_card_details(self, card_ids):
-        """
-        Retrieve details for a list of card IDs.
-
-        :param card_ids: List of card IDs.
-        :return: A list of dictionaries containing card details.
-        """
         return self.send_request(AnkiAction.CARDS_INFO, {"cards": card_ids})
 
     def find_cards(self, query):
-        """
-        Get card IDs for a specific Anki query.
-
-        :param query: The Anki query.
-        :return: True if the card exists, False otherwise.
-        """
         return self.send_request(AnkiAction.FIND_CARDS, {"query": query})
 
     def add_flashcard(self, deck_name, flashcard):
-        """
-        Adds a flashcard to an Anki deck with the 'chinese-tutor' note type.
-
-        Parameters:
-        deck_name (str): Name of the Anki deck.
-        chinese (str): The Chinese text.
-        pinyin (str): The corresponding Pinyin.
-        english (str): The English translation.
-        sample_usage (str): A sample sentence in Chinese.
-        sample_usage_english (str): English translation of the sample sentence.
-        """
         note = {
             "deckName": deck_name,
             "modelName": "chinese-tutor",
