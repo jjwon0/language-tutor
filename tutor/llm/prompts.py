@@ -1,36 +1,31 @@
-def get_generate_flashcard_from_word_prompt(word: str):
-    return f"""Generate all of the following items as bullet points for the word/phrase: {word}:
+_FLASHCARD_DESCRIPTION = """
+- Word (repeat the word/phrase verbatim).
+- Pinyin (provide the Pinyin transliteration of the Chinese word or phrase)
+- English (translate the word or phrase into English)
+- Sample Usage: (create a new sentence that uses the word or phrase in context)
+- Sample Usage English: (translate the created sample usage sentence into English)
 
-- Word/phrase: Repeat the word/phrase verbatim.
-- Pinyin: Provide the Pinyin transliteration of the Chinese word or phrase.
-- English Translation: Translate the word or phrase into English.
-- Sample Usage in Chinese: Create or find a sentence from the article (or construct a new one) that uses the word or phrase in context.
-- Sample Usage in English: Translate the sample usage sentence into English, ensuring that it reflects the usage of the word or phrase in context."""
+Ensure that fields in each flashcard focuses on clarity and practical usage for an intermediate Chinese student."""
+
+
+def get_generate_flashcard_from_word_prompt(word: str):
+    return f"""Generate the following fields to be used as a flashcard for the word {word}:
+{_FLASHCARD_DESCRIPTION}"""
 
 
 def get_generate_flashcard_from_paragraph_prompt(text: str):
-    return f"""Below the line is a paragraph from an article in Chinese: identify and extract key vocabulary and grammar phrases, ignoring proper nouns. For each identified item, generate a flashcard that includes the following information:
-
-- Word/Phrase in Simplified Chinese: Extract the word or phrase from the article.
-- Pinyin: Provide the Pinyin transliteration of the Chinese word or phrase.
-- English Translation: Translate the word or phrase into English.
-- Sample Usage in Chinese: Create or find a sentence from the article (or construct a new one) that uses the word or phrase in context.
-- Sample Usage in English: Translate the sample usage sentence into English, ensuring that it reflects the usage of the word or phrase in context.
-
-For each flashcard, focus on clarity and practical usage, ensuring the information is useful for an intermediate Chinese speaker looking to improve vocabulary and understanding of grammar.
+    return f"""Below the line is a paragraph from an article in Chinese. Extract key vocabulary and grammar phrases, except proper nouns.
 --
-{text}"""
+{text}
+--
+For each word or phrase, generate the following fields to be used as a flashcard for that word or phrase:
+{_FLASHCARD_DESCRIPTION}"""
 
 
 def get_generate_flashcard_from_llm_conversation_prompt(text: str):
-    return f"""Below the line is a conversation between a language learner and a LLM assistant in Chinese. Identify and extract key vocabulary and grammar phrases from the LLM's responses, ignoring proper nouns. For each identified item, generate a flashcard that includes the following information:
-
-- Word/Phrase in Simplified Chinese: Extract the word or phrase from the article.
-- Pinyin: Provide the Pinyin transliteration of the Chinese word or phrase.
-- English Translation: Translate the word or phrase into English.
-- Sample Usage in Chinese: Create or find a sentence from the article (or construct a new one) that uses the word or phrase in context.
-- Sample Usage in English: Translate the sample usage sentence into English, ensuring that it reflects the usage of the word or phrase in context.
-
-For each flashcard, focus on clarity and practical usage, ensuring the information is useful for an intermediate Chinese speaker looking to improve vocabulary and understanding of grammar.
+    return f"""Below the line is a conversation between a language learner and a LLM assistant in Chinese. Extract key vocabulary and grammar phrases, except proper nouns.
 --
-{text}"""
+{text}
+--
+For each word or phrase, generate the following fields to be used as a flashcard for that word or phrase:
+{_FLASHCARD_DESCRIPTION}"""
