@@ -24,6 +24,7 @@ def regenerate_flashcard_inner(word: str):
 
     assert len(card_ids) == 1, "Multiple cards match this query"
     card_id = card_ids[0]
+    card_detail = ankiconnect_client.get_card_details([card_id])[0]
     # TODO: get existing card fields and prompt to confirm that we actually wanna update
 
     prompt = _PROMPT_TMPL.format(word=word)
@@ -31,6 +32,6 @@ def regenerate_flashcard_inner(word: str):
     flashcards = generate_flashcards(prompt)
     dprint(flashcards)
     flashcard = flashcards.flashcards[0]
-    ankiconnect_client.update_flashcard(card_id, flashcard)
+    ankiconnect_client.update_flashcard(card_detail["note"], flashcard)
     print("Updated! The new flashcard is below:")
     print(flashcard)
