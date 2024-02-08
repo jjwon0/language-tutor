@@ -18,7 +18,7 @@ def generate_flashcards(text):
     try:
         dprint(text)
         flashcards: ChineseFlashcards = openai_client.chat.completions.create(
-            model="gpt-3.5-turbo-1106",
+            model="gpt-3.5-turbo",
             response_model=ChineseFlashcards,
             messages=[{"role": "user", "content": text}],
             # don't retry: it does not seem to work that well
