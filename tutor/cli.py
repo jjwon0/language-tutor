@@ -22,15 +22,22 @@ from tutor.commands.list_lesser_known_cards import (
     list_lesser_known_cards_inner,
 )
 from tutor.utils.logging import set_debug
-from tutor.llm_flashcards import DEFAULT_DECK
+from tutor.llm_flashcards import DEFAULT_DECK, GPT_3_5_TURBO, GPT_4, set_model
 
 load_dotenv()
 
 
 @click.group()
+@click.option(
+    "--model",
+    type=click.Choice([GPT_3_5_TURBO, GPT_4]),
+    default=GPT_3_5_TURBO,
+    help="Customize the OpenAI model used",
+)
 @click.option("--debug/--no-debug", default=False, help="Turn on extra debug logging")
-def cli(debug: bool):
+def cli(model: str, debug: bool):
     """chinese-tutor tool"""
+    set_model(model)
     set_debug(debug)
 
 
