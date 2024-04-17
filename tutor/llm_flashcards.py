@@ -3,16 +3,10 @@ from openai import OpenAI
 from tutor.utils.logging import dprint
 from tutor.utils.anki import AnkiConnectClient, get_subdeck
 from tutor.llm.models import ChineseFlashcards
+from tutor.cli_global_state import get_model, get_skip_confirm
 
 GPT_3_5_TURBO = "gpt-3.5-turbo"
 GPT_4 = "gpt-4"
-
-_MODEL = GPT_3_5_TURBO
-
-
-def set_model(model: str) -> None:
-    global _MODEL
-    _MODEL = model
 
 
 def generate_flashcards(text):
@@ -28,7 +22,7 @@ def generate_flashcards(text):
     try:
         dprint(text)
         flashcards: ChineseFlashcards = openai_client.chat.completions.create(
-            model=_MODEL,
+            model=get_model(),
             response_model=ChineseFlashcards,
             messages=[{"role": "user", "content": text}],
             # don't retry: it does not seem to work that well
@@ -66,6 +60,10 @@ def maybe_add_flashcards_to_deck(
             dprint(" - new card!")
             ankiconnect_client.add_flashcard(deck, f)
             print(f)
+            if not get_skip_confirm():
+                if not input('Add this to deck (y/n)? ') == 'y':
+                    dprint(" - skipped")
+                    continue
             dprint(" - added!")
             num_added += 1
     print(f"Added {num_added} new card(s)!")

@@ -21,8 +21,9 @@ from tutor.commands.regenerate_flashcard import (
 from tutor.commands.list_lesser_known_cards import (
     list_lesser_known_cards_inner,
 )
-from tutor.utils.logging import set_debug
-from tutor.llm_flashcards import DEFAULT_DECK, GPT_3_5_TURBO, GPT_4, set_model
+from tutor.llm_flashcards import DEFAULT_DECK, GPT_3_5_TURBO, GPT_4
+
+from tutor.cli_global_state import set_debug, set_model, set_skip_confirm
 
 load_dotenv()
 
@@ -35,10 +36,17 @@ load_dotenv()
     help="Customize the OpenAI model used",
 )
 @click.option("--debug/--no-debug", default=False, help="Turn on extra debug logging")
-def cli(model: str, debug: bool):
+@click.option(
+    "--skip-confirm",
+    type=bool,
+    default=False,
+    help="Skip confirmation for commands"
+)
+def cli(model: str, debug: bool, skip_confirm: bool):
     """chinese-tutor tool"""
     set_model(model)
     set_debug(debug)
+    set_skip_confirm(skip_confirm)
 
 
 @cli.command()
