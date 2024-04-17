@@ -19,4 +19,4 @@ def generate_flashcard_from_word_inner(deck: str, word: str):
     dprint(prompt)
     flashcards = generate_flashcards(prompt)
     dprint(flashcards)
-    maybe_add_flashcards_to_deck(flashcards, deck, DEFAULT_ROOT_DECK)
+    maybe_add_flashcards_to_deck(flashcards, deck)

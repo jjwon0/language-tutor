@@ -45,7 +45,7 @@ def get_word_exists_query(word: str):
 
 
 def maybe_add_flashcards_to_deck(
-    flashcards_container: ChineseFlashcards, deck: str, root_deck: str
+flashcards_container: ChineseFlashcards, deck: str
 ):
     ankiconnect_client = AnkiConnectClient()
 
@@ -71,5 +71,5 @@ def maybe_add_flashcards_to_deck(
 
 def maybe_add_flashcards(flashcards_container: ChineseFlashcards, subdeck: str):
     return maybe_add_flashcards_to_deck(
-        flashcards_container, get_subdeck(DEFAULT_DECK, subdeck), DEFAULT_ROOT_DECK
+        flashcards_container, get_subdeck(DEFAULT_DECK, subdeck)
     )
