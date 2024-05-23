@@ -21,7 +21,7 @@ from tutor.commands.regenerate_flashcard import (
 from tutor.commands.list_lesser_known_cards import (
     list_lesser_known_cards_inner,
 )
-from tutor.llm_flashcards import DEFAULT_DECK, GPT_3_5_TURBO, GPT_4
+from tutor.llm_flashcards import DEFAULT_DECK, GPT_3_5_TURBO, GPT_4, GPT_4o
 
 from tutor.cli_global_state import set_debug, set_model, set_skip_confirm
 
@@ -31,8 +31,8 @@ load_dotenv()
 @click.group()
 @click.option(
     "--model",
-    type=click.Choice([GPT_3_5_TURBO, GPT_4]),
-    default=GPT_3_5_TURBO,
+    type=click.Choice([GPT_3_5_TURBO, GPT_4, GPT_4o]),
+    default=GPT_4o,
     help="Customize the OpenAI model used",
 )
 @click.option("--debug/--no-debug", default=False, help="Turn on extra debug logging")
