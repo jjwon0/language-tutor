@@ -59,12 +59,12 @@ flashcards_container: ChineseFlashcards, deck: str
             dprint(f" - {len(details)} similar cards exist(s)! ")
         else:
             dprint(" - new card!")
-            ankiconnect_client.add_flashcard(deck, f)
             print(f)
             if not get_skip_confirm():
                 if not input('Add this to deck (y/n)? ') == 'y':
                     dprint(" - skipped")
                     continue
+            ankiconnect_client.add_flashcard(deck, f)
             dprint(" - added!")
             num_added += 1
     print(f"Added {num_added} new card(s)!")
