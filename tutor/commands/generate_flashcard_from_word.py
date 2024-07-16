@@ -3,7 +3,6 @@ from tutor.llm_flashcards import (
     generate_flashcards,
     maybe_add_flashcards_to_deck,
     get_word_exists_query,
-    DEFAULT_ROOT_DECK,
 )
 from tutor.llm.prompts import get_generate_flashcard_from_word_prompt
 from tutor.utils.logging import dprint

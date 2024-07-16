@@ -45,9 +45,7 @@ def get_word_exists_query(word: str):
     return f'"deck:{DEFAULT_DECK}" Chinese:*{word}*'
 
 
-def maybe_add_flashcards_to_deck(
-flashcards_container: ChineseFlashcards, deck: str
-):
+def maybe_add_flashcards_to_deck(flashcards_container: ChineseFlashcards, deck: str):
     ankiconnect_client = AnkiConnectClient()
 
     num_added = 0
@@ -61,7 +59,7 @@ flashcards_container: ChineseFlashcards, deck: str
             dprint(" - new card!")
             print(f)
             if not get_skip_confirm():
-                if not input('Add this to deck (y/n)? ') == 'y':
+                if not input("Add this to deck (y/n)? ") == "y":
                     dprint(" - skipped")
                     continue
             ankiconnect_client.add_flashcard(deck, f)
