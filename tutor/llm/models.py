@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Literal
 from pydantic import BaseModel, Field
 
 
@@ -10,6 +10,11 @@ class ChineseFlashcard(BaseModel):
     sample_usage_english: str = Field(
         description="The sample usage field translated to English"
     )
+    frequency: Literal[
+        "very common", "common", "infrequent", "rare", "very rare"
+    ] = Field(
+        description="Correctly assign one one of the predefined relative frequencies to this word/phrase"
+    )
 
     def __str__(self):
         return f"""
@@ -18,6 +23,7 @@ Pinyin: {self.pinyin}
 English: {self.english}
 Sample Usage: {self.sample_usage}
 Sample Usage (English): {self.sample_usage_english}
+Frequency: {self.frequency}
         """.strip()
 
     @classmethod
