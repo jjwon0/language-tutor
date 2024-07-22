@@ -91,8 +91,8 @@ def generate_flashcards_from_chatgpt(chatgpt_share_link: str):
 
 
 @cli.command()
-@click.argument("deck", type=str)
 @click.argument("word", type=str)
+@click.option("--deck", type=str, default=DEFAULT_DECK)
 def generate_flashcard_from_word(deck: str, word: str):
     """Add a new Anki flashcard for a specific WORD to DECK."""
     click.echo(generate_flashcard_from_word_inner(deck, word))
