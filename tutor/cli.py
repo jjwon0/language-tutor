@@ -98,6 +98,10 @@ def generate_flashcard_from_word(deck: str, word: str):
     click.echo(generate_flashcard_from_word_inner(deck, word))
 
 
+# Shortcut for the most common action.
+cli.add_command(generate_flashcard_from_word, name='g')
+
+
 @cli.command()
 @click.argument("word", type=str)
 def regenerate_flashcard(word: str):
