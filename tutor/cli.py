@@ -109,6 +109,10 @@ def regenerate_flashcard(word: str):
     click.echo(regenerate_flashcard_inner(word))
 
 
+# Shortcut for the next-most common action.
+cli.add_command(regenerate_flashcard, name='rg')
+
+
 @cli.command()
 @click.option("--deck", type=str, default=DEFAULT_DECK)
 @click.option("--count", type=int, default=5)
