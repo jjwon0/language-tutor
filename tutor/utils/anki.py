@@ -3,6 +3,8 @@ import json
 
 import requests
 
+from tutor.llm.models import ChineseFlashcard
+
 
 class AnkiAction(Enum):
     ADD_NOTE = "addNote"
@@ -40,10 +42,13 @@ class AnkiConnectClient:
         return result.get("result")
 
     def get_card_details(self, card_ids):
-        return self.send_request(AnkiAction.CARDS_INFO, {"cards": card_ids})
+        card_details = self.send_request(AnkiAction.CARDS_INFO, {"cards": card_ids})
+        cards = [ChineseFlashcard.from_anki_json(cd) for cd in card_details]
+        return cards
 
     def find_cards(self, query):
-        return self.send_request(AnkiAction.FIND_CARDS, {"query": query})
+        card_ids = self.send_request(AnkiAction.FIND_CARDS, {"query": query})
+        return self.get_card_details(card_ids)
 
     def add_flashcard(self, deck_name, flashcard):
         note = {

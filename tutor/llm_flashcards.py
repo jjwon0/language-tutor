@@ -42,6 +42,10 @@ DEFAULT_DECK = "Chinese::Jason's cards::chinese-tutor"
 
 
 def get_word_exists_query(word: str):
+    return f'"deck:{DEFAULT_DECK}" Chinese:{word}'
+
+
+def get_similar_words_exists_query(word: str):
     return f'"deck:{DEFAULT_DECK}" Chinese:*{word}*'
 
 
