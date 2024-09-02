@@ -4,6 +4,7 @@ _FLASHCARD_DESCRIPTION = """
 - English (translate the word or phrase into English)
 - Sample Usage: (create a new sentence that uses the word or phrase in context)
 - Sample Usage English: (translate the created sample usage sentence into English)
+- Frequency: (how often the word or phrase is actually used in context)
 
 Ensure that fields in each flashcard focuses on clarity and practical usage for an intermediate Chinese student."""
 
