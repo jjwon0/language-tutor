@@ -9,6 +9,8 @@ from tutor.llm.models import ChineseFlashcard
 class AnkiAction(Enum):
     ADD_NOTE = "addNote"
     CARDS_INFO = "cardsInfo"
+    NOTES_INFO = "notesInfo"
+    FIND_NOTES = "findNotes"
     FIND_CARDS = "findCards"
     DECK_NAMES = "deckNames"
     CREATE_DECK = "createDeck"
@@ -41,13 +43,29 @@ class AnkiConnectClient:
 
         return result.get("result")
 
+    def get_note_details(self, note_ids):
+        note_details = self.send_request(AnkiAction.NOTES_INFO, {"notes": note_ids})
+        return [ChineseFlashcard.from_anki_json(nd) for nd in note_details]
+
+    def find_note_ids(self, query):
+        """Search for notes by query (e.g., deck name or tags)."""
+        return self.send_request(AnkiAction.FIND_NOTES, {"query": query})
+
+    def find_notes(self, query):
+        """Search for and fetch notes by query."""
+        note_ids = self.find_note_ids(query)
+        return self.get_note_details(note_ids)
+
     def get_card_details(self, card_ids):
         card_details = self.send_request(AnkiAction.CARDS_INFO, {"cards": card_ids})
         cards = [ChineseFlashcard.from_anki_json(cd) for cd in card_details]
         return cards
 
+    def find_card_ids(self, query):
+        return self.send_request(AnkiAction.FIND_CARDS, {"query": query})
+
     def find_cards(self, query):
-        card_ids = self.send_request(AnkiAction.FIND_CARDS, {"query": query})
+        card_ids = self.find_card_ids(query)
         return self.get_card_details(card_ids)
 
     def add_flashcard(self, deck_name, flashcard, audio_filepath):
@@ -62,7 +80,13 @@ class AnkiConnectClient:
                 "Sample Usage (English)": flashcard.sample_usage_english,
             },
             "tags": [],
-            "audio": [{"path": audio_filepath, "filename": audio_filepath, "fields": ["Sample Usage (Audio)"]}]
+            "audio": [
+                {
+                    "path": audio_filepath,
+                    "filename": audio_filepath,
+                    "fields": ["Sample Usage (Audio)"],
+                }
+            ],
         }
         return self.send_request(AnkiAction.ADD_NOTE, {"note": note})
 
@@ -81,7 +105,13 @@ class AnkiConnectClient:
                     "Sample Usage": flashcard.sample_usage,
                     "Sample Usage (English)": flashcard.sample_usage_english,
                 },
-                "audio": [{"path": audio_filepath, "filename": audio_filepath, "fields": ["Sample Usage (Audio)"]}]
+                "audio": [
+                    {
+                        "path": audio_filepath,
+                        "filename": audio_filepath,
+                        "fields": ["Sample Usage (Audio)"],
+                    }
+                ],
             }
         }
         return self.send_request(AnkiAction.UPDATE_NOTE_FIELDS, payload)

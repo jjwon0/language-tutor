@@ -1,8 +1,10 @@
-from typing import List, Literal, Optional
+from typing import List, Literal, Union
+from pydantic.json_schema import SkipJsonSchema
 from pydantic import BaseModel, Field
 
 
 class ChineseFlashcard(BaseModel):
+    anki_note_id: SkipJsonSchema[Union[int, None]] = None
     word: str = Field("The word/phrase in simplified Chinese")
     pinyin: str = Field("The word romanized using Pinyin (lowercased)")
     english: str = Field("The word translated into English (lowercased)")
@@ -30,6 +32,7 @@ Frequency: {self.frequency}
     def from_anki_json(cls, anki_json):
         fields = anki_json["fields"]
         instance = cls(
+            anki_note_id=anki_json["noteId"],
             word=fields["Chinese"]["value"],
             pinyin=fields["Pinyin"]["value"],
             english=fields["English"]["value"],
