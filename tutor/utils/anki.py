@@ -8,13 +8,10 @@ from tutor.llm.models import ChineseFlashcard
 
 class AnkiAction(Enum):
     ADD_NOTE = "addNote"
-    CARDS_INFO = "cardsInfo"
     NOTES_INFO = "notesInfo"
     FIND_NOTES = "findNotes"
-    FIND_CARDS = "findCards"
     DECK_NAMES = "deckNames"
     CREATE_DECK = "createDeck"
-    DELETE_CARDS = "deleteCards"
     UPDATE_NOTE_FIELDS = "updateNoteFields"
 
 
@@ -56,18 +53,6 @@ class AnkiConnectClient:
         note_ids = self.find_note_ids(query)
         return self.get_note_details(note_ids)
 
-    def get_card_details(self, card_ids):
-        card_details = self.send_request(AnkiAction.CARDS_INFO, {"cards": card_ids})
-        cards = [ChineseFlashcard.from_anki_json(cd) for cd in card_details]
-        return cards
-
-    def find_card_ids(self, query):
-        return self.send_request(AnkiAction.FIND_CARDS, {"query": query})
-
-    def find_cards(self, query):
-        card_ids = self.find_card_ids(query)
-        return self.get_card_details(card_ids)
-
     def add_flashcard(self, deck_name, flashcard, audio_filepath):
         note = {
             "deckName": deck_name,
@@ -89,9 +74,6 @@ class AnkiConnectClient:
             ],
         }
         return self.send_request(AnkiAction.ADD_NOTE, {"note": note})
-
-    def delete_flashcards(self, card_ids):
-        return self.send_request(AnkiAction.DELETE_CARDS, {"cards": card_ids})
 
     def update_flashcard(self, note_id, flashcard, audio_filepath):
         payload = {

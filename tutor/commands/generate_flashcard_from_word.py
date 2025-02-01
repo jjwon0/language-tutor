@@ -11,12 +11,12 @@ from tutor.utils.logging import dprint
 
 def generate_flashcard_from_word_inner(deck: str, word: str):
     ankiconnect_client = AnkiConnectClient()
-    exact_card = ankiconnect_client.find_cards(get_word_exists_query(word))
+    exact_card = ankiconnect_client.find_notes(get_word_exists_query(word))
     if exact_card:
         print("Card exists already:")
         print(exact_card)
         return
-    similar_cards = ankiconnect_client.find_cards(get_similar_words_exists_query(word))
+    similar_cards = ankiconnect_client.find_notes(get_similar_words_exists_query(word))
     if similar_cards:
         print("Similar cards found:")
         for card in similar_cards:

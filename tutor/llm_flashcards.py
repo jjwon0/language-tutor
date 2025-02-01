@@ -57,9 +57,9 @@ def maybe_add_flashcards_to_deck(flashcards_container: ChineseFlashcards, deck: 
     for f in flashcards_container.flashcards:
         dprint(f"{f.word}")
         query = get_word_exists_query(f.word)
-        details = ankiconnect_client.find_cards(query)
-        if details:
-            dprint(f" - {len(details)} similar cards exist(s)! ")
+        existing_cards = ankiconnect_client.find_notes(query)
+        if existing_cards:
+            dprint(f" - {len(existing_cards)} similar cards exist(s)! ")
         else:
             dprint(" - new card!")
             print(f)
