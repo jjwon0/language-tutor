@@ -4,15 +4,17 @@ import azure.cognitiveservices.speech as speechsdk
 
 
 def text_to_speech(text):
-    speech_key = os.environ.get('AZURE_SPEECH_SERVICE_KEY')
-    service_region = os.environ.get('AZURE_SPEECH_SERVICE_REGION')
+    speech_key = os.environ.get("AZURE_SPEECH_SERVICE_KEY")
+    service_region = os.environ.get("AZURE_SPEECH_SERVICE_REGION")
 
     # Initialize the speech config
     speech_config = speechsdk.SpeechConfig(speech_key, service_region)
-    
+
     # Set the voice for Mandarin Chinese
-    speech_config.speech_synthesis_voice_name = "zh-CN-XiaoxiaoNeural"  # Example voice, Mandarin female
-    
+    speech_config.speech_synthesis_voice_name = (
+        "zh-CN-XiaoxiaoNeural"  # Example voice, Mandarin female
+    )
+
     # Configure the output to save to a file
     # TODO: cleanup/customize
     # note "User 1" refers to the current profile
@@ -23,10 +25,12 @@ def text_to_speech(text):
         + ".wav"
     )
     audio_output = speechsdk.audio.AudioOutputConfig(filename=filename)
-    
+
     # Create a speech synthesizer with audio output
-    synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_output)
-    
+    synthesizer = speechsdk.SpeechSynthesizer(
+        speech_config=speech_config, audio_config=audio_output
+    )
+
     # Perform speech synthesis
     result = synthesizer.speak_text_async(text).get()
 

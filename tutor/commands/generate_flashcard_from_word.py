@@ -22,7 +22,7 @@ def generate_flashcard_from_word_inner(deck: str, word: str):
         for card in similar_cards:
             print(card)
         user_input = input("Generate a new card anyway? (y/N): ").strip().lower()
-        if user_input != 'y':
+        if user_input != "y":
             print("Operation cancelled by user.")
             return
 

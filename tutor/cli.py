@@ -99,7 +99,7 @@ def generate_flashcard_from_word(deck: str, word: str):
 
 
 # Shortcut for the most common action.
-cli.add_command(generate_flashcard_from_word, name='g')
+cli.add_command(generate_flashcard_from_word, name="g")
 
 
 @cli.command()
@@ -110,7 +110,7 @@ def regenerate_flashcard(word: str):
 
 
 # Shortcut for the next-most common action.
-cli.add_command(regenerate_flashcard, name='rg')
+cli.add_command(regenerate_flashcard, name="rg")
 
 
 @cli.command()
