@@ -1,7 +1,7 @@
 _FLASHCARD_DESCRIPTION = """
 - Word (repeat the word/phrase verbatim).
 - Pinyin (provide the Pinyin transliteration of the Chinese word or phrase)
-- English (translate it into the most appopriate English phrase, considering cultural context and not always translating literally)
+- English (translate it into the most appropriate English phrase, and if needed, supplement with any specific context/nuance in parenthesis e.g. to contrast with other similar words)
 - Sample Usage: (create a new sentence that uses the word or phrase in context)
 - Sample Usage English: (translate the created sample usage sentence into English)
 - Frequency: (how often the word or phrase is actually used in context)
