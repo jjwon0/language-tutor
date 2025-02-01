@@ -50,7 +50,7 @@ class AnkiConnectClient:
         card_ids = self.send_request(AnkiAction.FIND_CARDS, {"query": query})
         return self.get_card_details(card_ids)
 
-    def add_flashcard(self, deck_name, flashcard):
+    def add_flashcard(self, deck_name, flashcard, audio_filepath):
         note = {
             "deckName": deck_name,
             "modelName": "chinese-tutor",
@@ -62,13 +62,14 @@ class AnkiConnectClient:
                 "Sample Usage (English)": flashcard.sample_usage_english,
             },
             "tags": [],
+            "audio": [{"path": audio_filepath, "filename": audio_filepath, "fields": ["Sample Usage (Audio)"]}]
         }
         return self.send_request(AnkiAction.ADD_NOTE, {"note": note})
 
     def delete_flashcards(self, card_ids):
         return self.send_request(AnkiAction.DELETE_CARDS, {"cards": card_ids})
 
-    def update_flashcard(self, note_id, flashcard):
+    def update_flashcard(self, note_id, flashcard, audio_filepath):
         payload = {
             "note": {
                 "id": note_id,
@@ -80,6 +81,7 @@ class AnkiConnectClient:
                     "Sample Usage": flashcard.sample_usage,
                     "Sample Usage (English)": flashcard.sample_usage_english,
                 },
+                "audio": [{"path": audio_filepath, "filename": audio_filepath, "fields": ["Sample Usage (Audio)"]}]
             }
         }
         return self.send_request(AnkiAction.UPDATE_NOTE_FIELDS, payload)

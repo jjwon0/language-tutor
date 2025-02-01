@@ -4,6 +4,7 @@ from tutor.utils.logging import dprint
 from tutor.utils.anki import AnkiConnectClient, get_subdeck
 from tutor.llm.models import ChineseFlashcards
 from tutor.cli_global_state import get_model, get_skip_confirm
+from tutor.utils.azure import text_to_speech
 
 GPT_3_5_TURBO = "gpt-3.5-turbo"
 GPT_4 = "gpt-4"
@@ -66,7 +67,8 @@ def maybe_add_flashcards_to_deck(flashcards_container: ChineseFlashcards, deck: 
                 if not input("Add this to deck (y/n)? ") == "y":
                     dprint(" - skipped")
                     continue
-            ankiconnect_client.add_flashcard(deck, f)
+            audio_filepath = text_to_speech(f.sample_usage)
+            ankiconnect_client.add_flashcard(deck, f, audio_filepath)
             dprint(" - added!")
             num_added += 1
     print(f"Added {num_added} new card(s)!")
