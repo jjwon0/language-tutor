@@ -17,6 +17,7 @@ def regenerate_flashcard_inner(word: str):
 
     assert len(flashcards) == 1, "Multiple cards match this query"
     flashcard = flashcards[0]
+    print(flashcard)
     user_input = input("Regenerate this card? (y/N): ").strip().lower()
     if user_input != "y":
         print("Operation cancelled by user.")
