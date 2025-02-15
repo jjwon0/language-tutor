@@ -1,6 +1,7 @@
 import os
 import hashlib
 import azure.cognitiveservices.speech as speechsdk
+from tutor.utils.anki import get_default_anki_media_dir
 
 
 def text_to_speech(text):
@@ -16,13 +17,9 @@ def text_to_speech(text):
     )
 
     # Configure the output to save to a file
-    # TODO: cleanup/customize
-    # note "User 1" refers to the current profile
-    filename = os.path.expanduser(
-        "~/Library/Application Support/Anki2/User 1/collection.media/"
-        + "chinese-tutor-"
-        + hashlib.md5(text.encode()).hexdigest()
-        + ".wav"
+    filename = str(
+        get_default_anki_media_dir()
+        / f"chinese-tutor-{hashlib.md5(text.encode()).hexdigest()}.wav"
     )
     audio_output = speechsdk.audio.AudioOutputConfig(filename=filename)
 

@@ -1,5 +1,7 @@
 from enum import Enum
 import json
+from pathlib import Path
+import platform
 
 import requests
 
@@ -86,6 +88,20 @@ class AnkiConnectClient:
                     "English": flashcard.english,
                     "Sample Usage": flashcard.sample_usage,
                     "Sample Usage (English)": flashcard.sample_usage_english,
+                    "Sample Usage (Audio)": "",
+                },
+            }
+        }
+        self.send_request(AnkiAction.UPDATE_NOTE_FIELDS, payload)
+        payload = {
+            "note": {
+                "id": note_id,
+                "fields": {
+                    "Chinese": flashcard.word,
+                    "Pinyin": flashcard.pinyin,
+                    "English": flashcard.english,
+                    "Sample Usage": flashcard.sample_usage,
+                    "Sample Usage (English)": flashcard.sample_usage_english,
                 },
                 "audio": [
                     {
@@ -112,3 +128,18 @@ class AnkiConnectClient:
 
 def get_subdeck(base_deck_name: str, subdeck_name: str):
     return f"{base_deck_name}::{subdeck_name}"
+
+
+def get_default_anki_media_dir() -> Path:
+    """Returns the default Anki media directory path based on the operating system."""
+    system = platform.system()
+    home = Path.home()
+
+    if system == "Windows":
+        return home / "AppData/Roaming/Anki2/User 1/collection.media"
+    elif system == "Darwin":  # macOS
+        return home / "Library/Application Support/Anki2/User 1/collection.media"
+    elif system == "Linux":
+        return home / ".local/share/Anki2/User 1/collection.media"
+    else:
+        raise NotImplementedError(f"Unsupported operating system: {system}")
