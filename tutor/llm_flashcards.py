@@ -1,4 +1,3 @@
-import instructor
 from openai import OpenAI
 from tutor.utils.logging import dprint
 from tutor.utils.anki import AnkiConnectClient, get_subdeck
@@ -18,22 +17,19 @@ def generate_flashcards(text):
     :param text: The text from which to generate flashcards.
     :return: Generated flashcard content.
     """
-
-    openai_client = instructor.patch(OpenAI())
+    openai_client = OpenAI()
 
     try:
         dprint(text)
-        flashcards: ChineseFlashcards = openai_client.chat.completions.create(
+        completion = openai_client.beta.chat.completions.parse(
             model=get_model(),
-            response_model=ChineseFlashcards,
+            response_format=ChineseFlashcards,
             messages=[{"role": "user", "content": text}],
-            # don't retry: it does not seem to work that well
-            max_retries=0,
-            # try to make sure the suggested flashcards are a bit more deterministic
             seed=69,
         )
-        dprint(flashcards._raw_response.usage)
-        return flashcards
+        dprint(completion.model_dump())
+        dprint(completion.__dict__)
+        return completion.choices[0].message.parsed
     except Exception as e:
         print("Error generating flashcards:", e)
 

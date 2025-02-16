@@ -1,5 +1,4 @@
-instructor==0.4.6
-openai==1.7.0
+openai==1.63.0
 pydantic==2.5.3
 python-dotenv==1.0.0
 PyYAML==6.0.1

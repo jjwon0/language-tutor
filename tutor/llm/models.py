@@ -5,17 +5,20 @@ from pydantic import BaseModel, Field
 
 class ChineseFlashcard(BaseModel):
     anki_note_id: SkipJsonSchema[Union[int, None]] = None
-    word: str = Field("The word/phrase in simplified Chinese")
-    pinyin: str = Field("The word romanized using Pinyin (lowercased)")
-    english: str = Field("The word translated into English (lowercased)")
-    sample_usage: str = Field("Example sentence with the word which contextualizes it")
+    word: str = Field(description="The word/phrase in simplified Chinese")
+    pinyin: str = Field(description="The word romanized using Pinyin (lowercased)")
+    english: str = Field(description="The word translated into English (lowercased)")
+    sample_usage: str = Field(
+        description="Example sentence with the word which contextualizes it"
+    )
     sample_usage_english: str = Field(
         description="The sample usage field translated to English"
     )
     frequency: Literal[
         "very common", "common", "infrequent", "rare", "very rare", None
     ] = Field(
-        description="Correctly assign one one of the predefined relative frequencies to this word/phrase"
+        default=None,
+        description="Correctly assign one one of the predefined relative frequencies to this word/phrase",
     )
 
     def __str__(self):
