@@ -6,12 +6,6 @@ from tutor.commands.generate_topics import (
     generate_topics_prompt_inner,
     select_conversation_topic_inner,
 )
-from tutor.commands.generate_flashcards_from_article import (
-    generate_flashcards_from_article_inner,
-)
-from tutor.commands.generate_flashcards_from_chatgpt import (
-    generate_flashcards_from_chatgpt_inner,
-)
 from tutor.commands.generate_flashcard_from_word import (
     generate_flashcard_from_word_inner,
 )
@@ -74,20 +68,6 @@ def generate_topics_prompt(conversation_topics_path: str, num_topics: int):
 def select_conversation_topic(conversation_topics_path: str):
     """Selects a random conversation topic from a file on disk."""
     click.echo(select_conversation_topic_inner(conversation_topics_path))
-
-
-@cli.command()
-@click.argument("article-path", type=click.Path(exists=True))
-def generate_flashcards_from_article(article_path: str):
-    """Generates new Anki flashcards from an article at ARTICLE_PATH."""
-    click.echo(generate_flashcards_from_article_inner(article_path))
-
-
-@cli.command()
-@click.argument("chatgpt-share-link", type=str)
-def generate_flashcards_from_chatgpt(chatgpt_share_link: str):
-    """Generates new Anki flashcards from the ChatGPT conversation at CHATGPT_SHARE_LINK."""
-    click.echo(generate_flashcards_from_chatgpt_inner(chatgpt_share_link))
 
 
 @cli.command()
