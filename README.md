@@ -28,7 +28,7 @@ A CLI tool to help generate and manage Chinese language flashcards in Anki.
    mkdir -p ~/.config/chinese-tutor
    cp config-template.yaml ~/.config/chinese-tutor/config.yaml
    ```
-   
+
    Edit the config file to set your default Anki deck:
    ```yaml
    default_deck: "Your::Deck::Name"
