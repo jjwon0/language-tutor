@@ -1,0 +1,5 @@
+# Default deck for flashcard operations
+# Copy this file to:
+#   Windows: %APPDATA%\chinese-tutor\config.yaml
+#   Unix/Mac: ~/.config/chinese-tutor/config.yaml
+default_deck: "Chinese::My Cards"

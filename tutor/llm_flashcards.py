@@ -4,6 +4,7 @@ from tutor.utils.anki import AnkiConnectClient, get_subdeck
 from tutor.llm.models import ChineseFlashcards
 from tutor.cli_global_state import get_model, get_skip_confirm
 from tutor.utils.azure import text_to_speech
+from tutor.utils.config import get_config
 
 GPT_3_5_TURBO = "gpt-3.5-turbo"
 GPT_4 = "gpt-4"
@@ -35,15 +36,14 @@ def generate_flashcards(text):
 
 
 DEFAULT_ROOT_DECK = "Chinese"
-DEFAULT_DECK = "Chinese::Jason's cards::chinese-tutor"
 
 
 def get_word_exists_query(word: str):
-    return f'"deck:{DEFAULT_DECK}" Chinese:{word}'
+    return f'"deck:{get_config().default_deck}" Chinese:{word}'
 
 
 def get_similar_words_exists_query(word: str):
-    return f'"deck:{DEFAULT_DECK}" Chinese:*{word}*'
+    return f'"deck:{get_config().default_deck}" Chinese:*{word}*'
 
 
 def maybe_add_flashcards_to_deck(flashcards_container: ChineseFlashcards, deck: str):
@@ -72,5 +72,5 @@ def maybe_add_flashcards_to_deck(flashcards_container: ChineseFlashcards, deck: 
 
 def maybe_add_flashcards(flashcards_container: ChineseFlashcards, subdeck: str):
     return maybe_add_flashcards_to_deck(
-        flashcards_container, get_subdeck(DEFAULT_DECK, subdeck)
+        flashcards_container, get_subdeck(get_config().default_deck, subdeck)
     )

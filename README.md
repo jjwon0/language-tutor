@@ -36,3 +36,32 @@ example:
 
 - customize Anki deck structure
 - support other languages
+
+## Configuration
+
+Before using the tool, you need to set up your configuration:
+
+1. Copy the template configuration file:
+   ```bash
+   # Windows
+   mkdir %APPDATA%\chinese-tutor
+   copy config-template.yaml %APPDATA%\chinese-tutor\config.yaml
+
+   # Unix/Mac
+   mkdir -p ~/.config/chinese-tutor
+   cp config-template.yaml ~/.config/chinese-tutor/config.yaml
+   ```
+
+2. Edit the configuration file to set your default Anki deck:
+   ```yaml
+   default_deck: "Your::Deck::Name"
+   ```
+
+   You can also set/view the default deck using the CLI:
+   ```bash
+   # View current configuration
+   ./ct config
+
+   # Set default deck
+   ./ct config "Your::Deck::Name"
+   ```

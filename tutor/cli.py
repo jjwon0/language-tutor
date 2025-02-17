@@ -15,7 +15,8 @@ from tutor.commands.regenerate_flashcard import (
 from tutor.commands.list_lesser_known_cards import (
     list_lesser_known_cards_inner,
 )
-from tutor.llm_flashcards import DEFAULT_DECK, GPT_3_5_TURBO, GPT_4, GPT_4o
+from tutor.llm_flashcards import GPT_3_5_TURBO, GPT_4, GPT_4o
+from tutor.utils.config import get_config
 
 from tutor.cli_global_state import set_debug, set_model, set_skip_confirm
 
@@ -72,9 +73,10 @@ def select_conversation_topic(conversation_topics_path: str):
 
 @cli.command()
 @click.argument("word", type=str)
-@click.option("--deck", type=str, default=DEFAULT_DECK)
+@click.option("--deck", type=str, default=None)
 def generate_flashcard_from_word(deck: str, word: str):
     """Add a new Anki flashcard for a specific WORD to DECK."""
+    deck = deck or get_config().default_deck
     click.echo(generate_flashcard_from_word_inner(deck, word))
 
 
@@ -94,8 +96,30 @@ cli.add_command(regenerate_flashcard, name="rg")
 
 
 @cli.command()
-@click.option("--deck", type=str, default=DEFAULT_DECK)
+@click.option("--deck", type=str, default=None)
 @click.option("--count", type=int, default=5)
 def list_lesser_known_cards(deck: str, count: int):
     """Regenerate Anki flashcard for a specific WORD."""
+    deck = deck or get_config().default_deck
     click.echo(list_lesser_known_cards_inner(deck, count))
+
+
+@cli.command()
+@click.argument("deck", required=False)
+def config(deck: str | None):
+    """View or set the default deck configuration.
+
+    If DECK is provided, sets the default deck.
+    If no DECK is provided, shows current configuration.
+    """
+    if deck:
+        get_config().default_deck = deck
+        click.echo(f"Default deck set to: {deck}")
+    else:
+        try:
+            current_deck = get_config().default_deck
+            click.echo(f"Current default deck: {current_deck}")
+        except ValueError as e:
+            click.echo(str(e), err=True)
+            click.echo("Use 'config DECK' to set a default deck")
+            exit(1)
