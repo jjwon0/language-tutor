@@ -56,6 +56,7 @@ class AnkiConnectClient:
         return self.get_note_details(note_ids)
 
     def add_flashcard(self, deck_name, flashcard, audio_filepath):
+        """Add a new flashcard and return its note ID."""
         note = {
             "deckName": deck_name,
             "modelName": "chinese-tutor",
@@ -77,53 +78,48 @@ class AnkiConnectClient:
         }
         return self.send_request(AnkiAction.ADD_NOTE, {"note": note})
 
-    def update_flashcard(self, note_id, flashcard, audio_filepath):
+    def update_flashcard(self, note_id, flashcard, audio_filepath=None):
+        """Update an existing flashcard."""
         payload = {
             "note": {
                 "id": note_id,
-                # update everything except the Chinese "id"
                 "fields": {
                     "Chinese": flashcard.word,
                     "Pinyin": flashcard.pinyin,
                     "English": flashcard.english,
                     "Sample Usage": flashcard.sample_usage,
                     "Sample Usage (English)": flashcard.sample_usage_english,
-                    "Sample Usage (Audio)": "",
                 },
             }
         }
+
+        if audio_filepath:
+            payload["note"]["fields"]["Sample Usage (Audio)"] = ""
+
         self.send_request(AnkiAction.UPDATE_NOTE_FIELDS, payload)
-        payload = {
-            "note": {
-                "id": note_id,
-                "fields": {
-                    "Chinese": flashcard.word,
-                    "Pinyin": flashcard.pinyin,
-                    "English": flashcard.english,
-                    "Sample Usage": flashcard.sample_usage,
-                    "Sample Usage (English)": flashcard.sample_usage_english,
-                },
-                "audio": [
-                    {
-                        "path": audio_filepath,
-                        "filename": audio_filepath,
-                        "fields": ["Sample Usage (Audio)"],
-                    }
-                ],
-            }
-        }
-        return self.send_request(AnkiAction.UPDATE_NOTE_FIELDS, payload)
+
+        if audio_filepath:
+            payload["note"]["audio"] = [
+                {
+                    "path": audio_filepath,
+                    "filename": audio_filepath,
+                    "fields": ["Sample Usage (Audio)"],
+                }
+            ]
+            self.send_request(AnkiAction.UPDATE_NOTE_FIELDS, payload)
 
     def list_decks(self):
         return self.send_request(AnkiAction.DECK_NAMES)
 
     def add_deck(self, deck_name):
-        return self.send_request(AnkiAction.CREATE_DECK, {"deck": deck_name})
+        """Create a new deck."""
+        self.send_request(AnkiAction.CREATE_DECK, {"deck": deck_name})
 
     def maybe_add_deck(self, deck_name):
+        """Create a deck if it doesn't exist."""
         decks = self.list_decks()
         if deck_name not in decks:
-            return self.add_deck(deck_name)
+            self.add_deck(deck_name)
 
 
 def get_subdeck(base_deck_name: str, subdeck_name: str):
