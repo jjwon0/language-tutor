@@ -1,47 +1,24 @@
 # chinese-tutor
 
-make language flashcards more easily
+A CLI tool to help generate and manage Chinese language flashcards in Anki.
 
-## usage
+## Setup
 
-- install Anki and AnkiConnect extension
-- create the expected deck structure (see `tutor/llm_flashcards.py` and `tutor/utils/anki.py`)
-- create a virtualenv and install all the requirements
-- run `python main.py`, or alternatively the shell script `./ct`
+1. **Prerequisites**
+   - Install Anki and the AnkiConnect extension
+   - Python with virtualenv/pyenv
 
-example:
+2. **Installation**
+   ```bash
+   # Create and activate a virtualenv (using your preferred method)
+   python -m venv venv
+   source venv/bin/activate  # or `venv\Scripts\activate` on Windows
 
-```
-./ct g 松弛感
-```
+   # Install dependencies
+   pip install -r requirements.txt
+   ```
 
-## requirements
-
-- pyenv or other virtualenv manager
-
-## oai keys
-
-- add `OPENAI_API_KEY=my-api-key` to a file called `.env` at the repo root
-
-## development setup
-
-- create a new virtualenv
-- install dependencies in the virtualenv:
-    ```
-    pip install -r requirements.txt
-    pip install -r requirements-dev.txt
-    ```
-
-## future
-
-- customize Anki deck structure
-- support other languages
-
-## Configuration
-
-Before using the tool, you need to set up your configuration:
-
-1. Copy the template configuration file:
+3. **Configuration**
    ```bash
    # Windows
    mkdir %APPDATA%\chinese-tutor
@@ -51,13 +28,13 @@ Before using the tool, you need to set up your configuration:
    mkdir -p ~/.config/chinese-tutor
    cp config-template.yaml ~/.config/chinese-tutor/config.yaml
    ```
-
-2. Edit the configuration file to set your default Anki deck:
+   
+   Edit the config file to set your default Anki deck:
    ```yaml
    default_deck: "Your::Deck::Name"
    ```
 
-   You can also set/view the default deck using the CLI:
+   You can also manage configuration via CLI:
    ```bash
    # View current configuration
    ./ct config
@@ -65,3 +42,44 @@ Before using the tool, you need to set up your configuration:
    # Set default deck
    ./ct config "Your::Deck::Name"
    ```
+
+4. **OpenAI Setup**
+   Create a `.env` file in the project root:
+   ```
+   OPENAI_API_KEY=your-api-key-here
+   ```
+
+## Usage
+
+Generate a flashcard for a word:
+```bash
+./ct g 松弛感
+```
+
+List recently challenging cards:
+```bash
+./ct list-lesser-known-cards
+```
+
+View all commands:
+```bash
+./ct --help
+```
+
+## Development
+
+1. Install development dependencies:
+   ```bash
+   pip install -r requirements-dev.txt
+   ```
+
+2. Install pre-commit hooks:
+   ```bash
+   pre-commit install
+   ```
+
+## Future Plans
+
+- Support for other languages
+- Additional customization options
+- Enhanced card generation features
