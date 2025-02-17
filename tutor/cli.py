@@ -1,5 +1,5 @@
 import click
-
+from typing import Optional
 from dotenv import load_dotenv
 
 from tutor.commands.generate_topics import (
@@ -34,7 +34,7 @@ load_dotenv()
 @click.option(
     "--skip-confirm", type=bool, default=False, help="Skip confirmation for commands"
 )
-def cli(model: str, debug: bool, skip_confirm: bool):
+def cli(model: str, debug: bool, skip_confirm: bool) -> None:
     """chinese-tutor tool"""
     set_model(model)
     set_debug(debug)
@@ -54,7 +54,7 @@ def cli(model: str, debug: bool, skip_confirm: bool):
     help="Number of new topics to generate",
     default=10,
 )
-def generate_topics_prompt(conversation_topics_path: str, num_topics: int):
+def generate_topics_prompt(conversation_topics_path: str, num_topics: int) -> None:
     """Prints a prompt to pass to ChatGPT to get new conversation topics."""
     click.echo(generate_topics_prompt_inner(conversation_topics_path, num_topics))
 
@@ -106,7 +106,7 @@ def list_lesser_known_cards(deck: str, count: int):
 
 @cli.command()
 @click.argument("deck", required=False)
-def config(deck: str | None):
+def config(deck: Optional[str]) -> None:
     """View or set the default deck configuration.
 
     If DECK is provided, sets the default deck.
