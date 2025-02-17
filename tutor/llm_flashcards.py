@@ -35,9 +35,6 @@ def generate_flashcards(text):
         print("Error generating flashcards:", e)
 
 
-DEFAULT_ROOT_DECK = "Chinese"
-
-
 def get_word_exists_query(word: str):
     return f'"deck:{get_config().default_deck}" Chinese:{word}'
 
