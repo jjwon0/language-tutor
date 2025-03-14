@@ -118,7 +118,15 @@ def list_lesser_known_cards(deck: str, count: int):
     default=None,
     help="Limit the number of cards to process",
 )
-def fix_cards(deck: Optional[str], dry_run: bool, limit: Optional[int]) -> None:
+@click.option(
+    "--force-update",
+    is_flag=True,
+    default=False,
+    help="Force update all cards even if they have all required fields",
+)
+def fix_cards(
+    deck: Optional[str], dry_run: bool, limit: Optional[int], force_update: bool
+) -> None:
     """Fix all cards in a deck by regenerating them with latest features.
 
     Only regenerates audio if the sample usage changes.
@@ -126,7 +134,21 @@ def fix_cards(deck: Optional[str], dry_run: bool, limit: Optional[int]) -> None:
     from tutor.commands.fix_cards import fix_cards_inner
 
     deck = deck or get_config().default_deck
-    click.echo(fix_cards_inner(deck, dry_run, limit))
+    click.echo(fix_cards_inner(deck, dry_run, limit, force_update))
+
+
+@cli.command()
+@click.option(
+    "--model",
+    "-m",
+    default="chinese-tutor",
+    help="The name of the Anki model to update. Defaults to 'chinese-tutor'.",
+)
+def update_card_styling(model: str) -> None:
+    """Update the styling of Anki cards without changing their content."""
+    from tutor.commands.update_card_styling import update_card_styling_inner
+
+    click.echo(update_card_styling_inner(model_name=model))
 
 
 @cli.command()
