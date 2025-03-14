@@ -46,9 +46,6 @@ class VocabItem(BaseModel):
 class ConversationReview(BaseModel):
     """Review format for the entire conversation"""
 
-    overall_feedback: str = Field(
-        description="Overall assessment focusing on communication effectiveness"
-    )
     grammar_feedback: List[GrammarFeedback] = Field(
         description="Detailed grammar corrections for non-native expressions"
     )
@@ -89,7 +86,6 @@ def get_conversation_review(
     except Exception as e:
         print(f"Error generating conversation review: {e}")
         return ConversationReview(
-            overall_feedback="I apologize, but I'm having trouble generating a review at the moment.",
             grammar_feedback=[],
             vocabulary_review=[],
         )
@@ -99,7 +95,6 @@ def get_dialogue_response(
     user_response: str,
     dialogue_history: List[dict],
     scenario: str,
-    include_translations: bool = True,
 ) -> DialogueResponse:
     """Generate the next dialogue response using OpenAI."""
     openai_client = OpenAI()
@@ -125,13 +120,8 @@ Provide the next line of dialogue naturally. Follow these rules:
 
 Format your response as a JSON object with these fields:
 - next_line_zh: Next line in Chinese
-- next_line_pinyin: Pinyin for the next line (if translations requested)
-- next_line_en: English translation (if translations requested)"""
-
-    if not include_translations:
-        prompt += """
-
-Note: Translations (pinyin and English) are optional for this turn."""
+- next_line_pinyin: Pinyin for the next line
+- next_line_en: English translation"""
 
     try:
         completion = openai_client.chat.completions.create(
@@ -152,10 +142,8 @@ Note: Translations (pinyin and English) are optional for this turn."""
         # Return a fallback response
         return DialogueResponse(
             next_line_zh="好的，让我们继续",
-            next_line_pinyin="hǎo de, ràng wǒ men jì xù"
-            if include_translations
-            else None,
-            next_line_en="Okay, let's continue" if include_translations else None,
+            next_line_pinyin="hǎo de, ràng wǒ men jì xù",
+            next_line_en="Okay, let's continue",
         )
 
 
@@ -163,12 +151,6 @@ def create_app():
     # Get the directory containing web assets
     web_dir = pathlib.Path(__file__).parent
     static_dir = web_dir / "static"
-
-    print(f"Web directory: {web_dir}")
-    print(f"Static directory: {static_dir}")
-    print(f"Static directory exists: {static_dir.exists()}")
-    if static_dir.exists():
-        print(f"Static directory contents: {list(static_dir.iterdir())}")
 
     # Create Flask app with explicit static file configuration
     app = Flask(
@@ -233,11 +215,7 @@ def create_app():
         user_response = request.json.get("response", "")
         history = request.json.get("history", [])
         scenario = request.json.get("scenario", "restaurant")
-        include_translations = request.json.get("include_translations", True)
-
-        response = get_dialogue_response(
-            user_response, history, scenario, include_translations
-        )
+        response = get_dialogue_response(user_response, history, scenario)
         return jsonify(response.model_dump())
 
     @app.route("/api/review", methods=["POST"])

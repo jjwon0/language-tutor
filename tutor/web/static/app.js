@@ -251,8 +251,35 @@ function DialogueApp() {
     const [isLoading, setIsLoading] = React.useState(false);
     const [showPinyin, setShowPinyin] = React.useState(false);
     const [showEnglish, setShowEnglish] = React.useState(false);
+
+
     const [isReviewing, setIsReviewing] = React.useState(false);
     const [review, setReview] = React.useState(null);
+
+    const fetchReview = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch('http://localhost:5001/api/review', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    history: dialogue.map(d => ({
+                        role: d.role,
+                        content: d.content_zh,
+                    })),
+                    scenario: scenario,
+                }),
+            });
+            const data = await response.json();
+            setReview(data);
+        } catch (error) {
+            console.error('Error getting review:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const startDialogue = async () => {
         if (isLoading) return;
@@ -269,13 +296,15 @@ function DialogueApp() {
             setDialogue([{
                 role: 'tutor',
                 situation_zh: data.situation_zh,
-                situation_en: showEnglish ? data.situation_en : null,
+                situation_en: data.situation_en,
                 content_zh: data.initial_line_zh,
-                content_pinyin: showPinyin ? data.initial_line_pinyin : null,
-                content_en: showEnglish ? data.initial_line_en : null,
+                content_pinyin: data.initial_line_pinyin,
+                content_en: data.initial_line_en,
             }]);
             setIsStarted(true);
+            // Clear any existing review when starting new dialogue
             setReview(null);
+            setIsReviewing(false);
         } catch (error) {
             console.error('Error starting dialogue:', error);
         } finally {
@@ -305,22 +334,23 @@ function DialogueApp() {
                         content: d.content_zh,
                     })),
                     scenario: scenario,
-                    include_translations: showPinyin || showEnglish,
+
                 }),
             });
             const data = await response.json();
 
             // Continue with dialogue
-
             newDialogue.push({
                 role: 'tutor',
                 content_zh: data.next_line_zh,
-                content_pinyin: showPinyin ? data.next_line_pinyin : null,
-                content_en: showEnglish ? data.next_line_en : null,
+                content_pinyin: data.next_line_pinyin,
+                content_en: data.next_line_en,
             });
 
             setDialogue(newDialogue);
             setUserInput('');
+            // Clear cached review since conversation changed
+            setReview(null);
         } catch (error) {
             console.error('Error sending response:', error);
         } finally {
@@ -344,7 +374,7 @@ function DialogueApp() {
                                 checked={showPinyin}
                                 onChange={(e) => setShowPinyin(e.target.checked)}
                             />
-                            Show Pinyin
+                            Pinyin
                         </label>
                         <label>
                             <input
@@ -352,7 +382,7 @@ function DialogueApp() {
                                 checked={showEnglish}
                                 onChange={(e) => setShowEnglish(e.target.checked)}
                             />
-                            Show English
+                            English
                         </label>
                     </div>
                     <select
@@ -374,13 +404,33 @@ function DialogueApp() {
                 </div>
             ) : (
                 <div className="dialogue-container">
+                    <div className="display-toggles">
+                        <label>
+                            <input
+                                type="checkbox"
+                                checked={showPinyin}
+                                onChange={(e) => setShowPinyin(e.target.checked)}
+                            />
+                            Pinyin
+                        </label>
+                        <label>
+                            <input
+                                type="checkbox"
+                                checked={showEnglish}
+                                onChange={(e) => setShowEnglish(e.target.checked)}
+                            />
+                            English
+                        </label>
+                    </div>
                     {dialogue.map((message, index) => (
                         <div key={index} className={`message ${message.role}-message`}>
                             {message.situation_zh && (
                                 <div className="situation-box">
                                     <div className="situation-title">Current Scenario</div>
                                     <div className="chinese-text">{message.situation_zh}</div>
-                                    <div className="english">{message.situation_en}</div>
+                                    {showEnglish && message.situation_en && (
+                                        <div className="english">{message.situation_en}</div>
+                                    )}
                                 </div>
                             )}
                             <div className="chinese-text">{message.content_zh}</div>
@@ -400,10 +450,7 @@ function DialogueApp() {
                             <div className="review-content">
                                 <h2>Conversation Review</h2>
 
-                                <div className="review-section">
-                                    <h3>Overall Feedback</h3>
-                                    <p>{review.overall_feedback}</p>
-                                </div>
+
 
 
 
@@ -448,10 +495,7 @@ function DialogueApp() {
                                 </div>
 
                                 <button
-                                    onClick={() => {
-                                        setIsReviewing(false);
-                                        setReview(null);
-                                    }}
+                                    onClick={() => setIsReviewing(false)}
                                     className="close-review"
                                 >
                                     Close Review
@@ -461,24 +505,6 @@ function DialogueApp() {
                     )}
 
                     <div className="input-area">
-                        <div className="display-toggles">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={showPinyin}
-                                    onChange={(e) => setShowPinyin(e.target.checked)}
-                                />
-                                Show Pinyin
-                            </label>
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={showEnglish}
-                                    onChange={(e) => setShowEnglish(e.target.checked)}
-                                />
-                                Show English
-                            </label>
-                        </div>
                         <textarea
                             value={userInput}
                             onChange={(e) => setUserInput(e.target.value)}
@@ -501,35 +527,17 @@ function DialogueApp() {
                                 {isLoading ? (
                                     <>
                                         <span className="spinner"></span>
-                                        Sending...
+                                        Working...
                                     </>
                                 ) : 'Send Response'}
                             </button>
                             <button
-                                onClick={async () => {
-                                    setIsLoading(true);
-                                    try {
-                                        const response = await fetch('http://localhost:5001/api/review', {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                            },
-                                            body: JSON.stringify({
-                                                history: dialogue.map(d => ({
-                                                    role: d.role,
-                                                    content: d.content_zh,
-                                                })),
-                                                scenario: scenario,
-                                            }),
-                                        });
-                                        const data = await response.json();
-                                        setReview(data);
-                                        setIsReviewing(true);
-                                    } catch (error) {
-                                        console.error('Error getting review:', error);
-                                    } finally {
-                                        setIsLoading(false);
+                                onClick={() => {
+                                    if (!review) {
+                                        // Only fetch if we don't have a review
+                                        fetchReview();
                                     }
+                                    setIsReviewing(true);
                                 }}
                                 disabled={isLoading || dialogue.length < 2}
                                 className="review-button"
