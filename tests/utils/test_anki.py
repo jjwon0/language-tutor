@@ -311,3 +311,90 @@ def test_get_default_anki_media_dir_unsupported():
         with pytest.raises(NotImplementedError) as exc_info:
             get_default_anki_media_dir()
         assert "Unsupported operating system" in str(exc_info.value)
+
+
+def test_update_model_styling(anki_client):
+    with patch("requests.post") as mock_post:
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"result": None, "error": None}
+        mock_post.return_value = mock_response
+
+        model_name = "test-model"
+        css = ".card { font-size: 20px; }"
+
+        anki_client.update_model_styling(model_name, css)
+
+        mock_post.assert_called_once()
+        args = mock_post.call_args[1]
+        data = json.loads(args["data"])
+        assert data["action"] == AnkiAction.UPDATE_MODEL_STYLING.value
+        assert data["params"]["model"]["name"] == model_name
+        assert data["params"]["model"]["css"] == css
+
+
+def test_update_model_templates(anki_client):
+    with patch("requests.post") as mock_post:
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"result": None, "error": None}
+        mock_post.return_value = mock_response
+
+        model_name = "test-model"
+        templates = {
+            "Card 1": {
+                "Front": "<div>{{Front}}</div>",
+                "Back": "<div>{{Front}}<hr>{{Back}}</div>",
+            }
+        }
+
+        anki_client.update_model_templates(model_name, templates)
+
+        mock_post.assert_called_once()
+        args = mock_post.call_args[1]
+        data = json.loads(args["data"])
+        assert data["action"] == AnkiAction.UPDATE_MODEL_TEMPLATES.value
+        assert data["params"]["model"]["name"] == model_name
+        assert data["params"]["model"]["templates"] == templates
+
+
+def test_update_card_styling_and_templates(anki_client):
+    with patch("requests.post") as mock_post:
+        # Configure the mock responses for both API calls
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"result": None, "error": None}
+        mock_post.return_value = mock_response
+
+        # Test data
+        model_name = "test-model"
+        css = ".card { font-size: 20px; }"
+        templates = {
+            "Card 1": {
+                "Front": "<div>{{Front}}</div>",
+                "Back": "<div>{{Front}}<hr>{{Back}}</div>",
+            }
+        }
+
+        # Call the method
+        anki_client.update_card_styling_and_templates(
+            model_name=model_name, css=css, templates=templates
+        )
+
+        # Verify both API calls were made correctly
+        assert mock_post.call_count == 2
+        calls = mock_post.call_args_list
+
+        # First call should be updateModelStyling
+        first_call = calls[0][1]
+        first_data = json.loads(first_call["data"])
+        assert first_data["action"] == AnkiAction.UPDATE_MODEL_STYLING.value
+        assert first_data["params"]["model"]["name"] == model_name
+        assert first_data["params"]["model"]["css"] == css
+
+        # Second call should be updateModelTemplates
+        second_call = calls[1][1]
+        second_data = json.loads(second_call["data"])
+        assert second_data["action"] == AnkiAction.UPDATE_MODEL_TEMPLATES.value
+        assert second_data["params"]["model"]["name"] == model_name
+        assert second_data["params"]["model"]["templates"] == templates
