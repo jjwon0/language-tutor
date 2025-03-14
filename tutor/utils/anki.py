@@ -126,11 +126,11 @@ class AnkiConnectClient:
                     "English": flashcard.english,
                     "Sample Usage": flashcard.sample_usage,
                     "Sample Usage (English)": flashcard.sample_usage_english,
-                    "Related Words": "\n".join(
-                        [
+                    "Related Words": (
+                        "\n".join(
                             f"{w.word} ({w.pinyin}) - {w.english} [{w.relationship}]"
                             for w in flashcard.related_words
-                        ]
+                        )
                     )
                     if flashcard.related_words
                     else "",
@@ -219,6 +219,22 @@ class AnkiConnectClient:
             raise AnkiConnectError(
                 f"Failed to get fields for note ID {note_id}", e.action, e.response
             )
+
+    def update_card_styling_and_templates(
+        self, model_name: str, css: str, templates: Dict
+    ) -> None:
+        """Update the card styling and templates for the specified model.
+
+        Args:
+            model_name: The name of the model to update.
+            css: The CSS styling to apply.
+            templates: The templates to apply.
+        """
+        # Update CSS
+        self.update_model_styling(model_name, css)
+
+        # Update templates
+        self.update_model_templates(model_name, templates)
 
     def get_model_styling(self, model_name: str) -> Dict:
         """Get the CSS styling for a model.
