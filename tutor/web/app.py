@@ -1,6 +1,162 @@
 import pathlib
+from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from openai import OpenAI
+from pydantic import BaseModel, Field
+from typing import List, Optional
+from ..cli_global_state import get_model
+
+# Load environment variables
+load_dotenv()
+
+
+class DialogueResponse(BaseModel):
+    """Response format for dialogue turns"""
+
+    next_line_zh: str = Field(description="The next line of dialogue in Chinese")
+    next_line_pinyin: Optional[str] = Field(description="Pinyin for the next line")
+    next_line_en: Optional[str] = Field(
+        description="English translation of the next line"
+    )
+
+
+class GrammarFeedback(BaseModel):
+    """Feedback for a specific grammar point"""
+
+    original: str = Field(description="Original phrase used by the student")
+    correction: str = Field(description="Corrected native-like expression")
+    explanation: str = Field(
+        description="Explanation of why the correction is more natural"
+    )
+    example: str = Field(
+        description="Another example using this grammar pattern correctly"
+    )
+
+
+class VocabItem(BaseModel):
+    """Vocabulary item with context"""
+
+    word: str = Field(description="The Chinese word or phrase")
+    pinyin: str = Field(description="Pinyin pronunciation")
+    meaning: str = Field(description="English meaning")
+    usage_note: str = Field(description="Note about when/how to use this word")
+
+
+class ConversationReview(BaseModel):
+    """Review format for the entire conversation"""
+
+    overall_feedback: str = Field(
+        description="Overall assessment focusing on communication effectiveness"
+    )
+    grammar_feedback: List[GrammarFeedback] = Field(
+        description="Detailed grammar corrections for non-native expressions"
+    )
+    vocabulary_review: List[VocabItem] = Field(
+        description="Key vocabulary from the conversation"
+    )
+
+
+def get_conversation_review(
+    dialogue_history: List[dict], scenario: str
+) -> ConversationReview:
+    """Generate a comprehensive review of the entire conversation."""
+    openai_client = OpenAI()
+
+    # Format dialogue history for the prompt
+    history_text = "\n".join(
+        f"{'Tutor' if msg['role'] == 'tutor' else 'User'}: {msg['content']}"
+        for msg in dialogue_history
+    )
+
+    try:
+        completion = openai_client.beta.chat.completions.parse(
+            model=get_model(),
+            response_format=ConversationReview,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a Chinese language tutor focusing on helping students achieve native-like expression. Pay special attention to phrases that sound unnatural or non-native.",
+                },
+                {
+                    "role": "user",
+                    "content": f"Review this Chinese conversation practice. Scenario: {scenario}\n\nConversation:\n{history_text}",
+                },
+            ],
+            seed=69,
+        )
+        return completion.choices[0].message.parsed
+    except Exception as e:
+        print(f"Error generating conversation review: {e}")
+        return ConversationReview(
+            overall_feedback="I apologize, but I'm having trouble generating a review at the moment.",
+            grammar_feedback=[],
+            vocabulary_review=[],
+        )
+
+
+def get_dialogue_response(
+    user_response: str,
+    dialogue_history: List[dict],
+    scenario: str,
+    include_translations: bool = True,
+) -> DialogueResponse:
+    """Generate the next dialogue response using OpenAI."""
+    openai_client = OpenAI()
+
+    # Format dialogue history for the prompt
+    history_text = "\n".join(
+        f"{'Tutor' if msg['role'] == 'tutor' else 'User'}: {msg['content']}"
+        for msg in dialogue_history
+    )
+
+    prompt = f"""You are helping a student practice Chinese conversation. The scenario is: {scenario}.
+
+Conversation history:
+{history_text}
+
+User's response: {user_response}
+
+Provide the next line of dialogue naturally. Follow these rules:
+1. Continue the dialogue naturally based on the scenario
+2. Keep the conversation at an intermediate level
+3. Focus on natural, practical dialogue
+4. Keep responses concise and natural
+
+Format your response as a JSON object with these fields:
+- next_line_zh: Next line in Chinese
+- next_line_pinyin: Pinyin for the next line (if translations requested)
+- next_line_en: English translation (if translations requested)"""
+
+    if not include_translations:
+        prompt += """
+
+Note: Translations (pinyin and English) are optional for this turn."""
+
+    try:
+        completion = openai_client.chat.completions.create(
+            model=get_model(),  # Use the same model as flashcards
+            response_format={"type": "json_object"},
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful Chinese language tutor. Always respond in the exact JSON format requested.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+        )
+        response_json = completion.choices[0].message.content
+        return DialogueResponse.model_validate_json(response_json)
+    except Exception as e:
+        print(f"Error generating dialogue response: {e}")
+        # Return a fallback response
+        return DialogueResponse(
+            next_line_zh="好的，让我们继续",
+            next_line_pinyin="hǎo de, ràng wǒ men jì xù"
+            if include_translations
+            else None,
+            next_line_en="Okay, let's continue" if include_translations else None,
+        )
 
 
 def create_app():
@@ -74,23 +230,23 @@ def create_app():
     @app.route("/api/respond", methods=["POST"])
     def respond_to_dialogue():
         """Process user's response and continue the dialogue."""
-        # user_response = request.json.get("response", "")
+        user_response = request.json.get("response", "")
+        history = request.json.get("history", [])
+        scenario = request.json.get("scenario", "restaurant")
+        include_translations = request.json.get("include_translations", True)
 
-        # Mock response data for testing
-        return jsonify(
-            {
-                "evaluation": "很好！Your response was good. You used appropriate restaurant vocabulary.",
-                "correction_zh": "",
-                "correction_pinyin": "",
-                "next_line_zh": "好的，您还需要别的吗？",
-                "next_line_pinyin": "hǎo de, nín hái xū yào bié de ma?",
-                "next_line_en": "OK, would you like anything else?",
-                "suggested_words": [
-                    "点菜 (diǎn cài) - to order food",
-                    "服务员 (fú wù yuán) - waiter/waitress",
-                    "菜单 (cài dān) - menu",
-                ],
-            }
+        response = get_dialogue_response(
+            user_response, history, scenario, include_translations
         )
+        return jsonify(response.model_dump())
+
+    @app.route("/api/review", methods=["POST"])
+    def review_conversation():
+        """Generate a comprehensive review of the conversation."""
+        history = request.json.get("history", [])
+        scenario = request.json.get("scenario", "restaurant")
+
+        review = get_conversation_review(history, scenario)
+        return jsonify(review.model_dump())
 
     return app
