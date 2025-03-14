@@ -47,24 +47,37 @@ def maybe_add_flashcards_to_deck(flashcards_container: ChineseFlashcards, deck: 
     ankiconnect_client = AnkiConnectClient()
 
     num_added = 0
-    for f in flashcards_container.flashcards:
-        dprint(f"{f.word}")
-        query = get_word_exists_query(f.word)
-        existing_cards = ankiconnect_client.find_notes(query)
-        if existing_cards:
-            dprint(f" - {len(existing_cards)} similar cards exist(s)! ")
-        else:
-            dprint(" - new card!")
-            print(f)
-            if not get_skip_confirm():
-                if not input("Add this to deck (y/n)? ") == "y":
-                    dprint(" - skipped")
+    try:
+        for f in flashcards_container.flashcards:
+            dprint(f"{f.word}")
+            query = get_word_exists_query(f.word)
+            existing_cards = ankiconnect_client.find_notes(query)
+            if existing_cards:
+                dprint(f" - {len(existing_cards)} similar cards exist(s)! ")
+            else:
+                dprint(" - new card!")
+                print(f)
+                if not get_skip_confirm():
+                    try:
+                        if not input("Add this to deck (y/n)? ").lower().strip() == "y":
+                            dprint(" - skipped")
+                            continue
+                    except (KeyboardInterrupt, EOFError):
+                        print("\nAborted by user")
+                        return
+                try:
+                    audio_filepath = text_to_speech(f.sample_usage)
+                    note_id = ankiconnect_client.add_flashcard(deck, f, audio_filepath)
+                    dprint(f" - added with note ID: {note_id}!")
+                    num_added += 1
+                except Exception as e:
+                    print(f"Error adding flashcard for '{f.word}': {str(e)}")
                     continue
-            audio_filepath = text_to_speech(f.sample_usage)
-            ankiconnect_client.add_flashcard(deck, f, audio_filepath)
-            dprint(" - added!")
-            num_added += 1
-    print(f"Added {num_added} new card(s)!")
+    except KeyboardInterrupt:
+        print("\nAborted by user")
+    finally:
+        if num_added > 0:
+            print(f"Added {num_added} new card(s)!")
 
 
 def maybe_add_flashcards(flashcards_container: ChineseFlashcards, subdeck: str):
