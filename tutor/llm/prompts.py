@@ -1,17 +1,12 @@
 _FLASHCARD_DESCRIPTION = """
-- Word (repeat the word/phrase verbatim).
-- Pinyin (provide the Pinyin transliteration of the Chinese word or phrase)
-- English (translate it into the most appropriate English phrase, and if needed, supplement with any specific context/nuance in parenthesis e.g. to contrast with other similar words)
-- Sample Usage: (create a new sentence that uses the word or phrase in context)
-- Sample Usage English: (translate the created sample usage sentence into English)
-- Frequency: (how often the word or phrase is actually used in context)
-- Related Words: (provide 2-3 semantically related words that would be helpful for learning this word, each with:
-  • Chinese word/phrase
-  • Pinyin
-  • English translation
-  • Brief note on relationship (keep it very concise, e.g. 'synonym', 'antonym', 'formal variant', 'casual variant', 'commonly paired'))
+Generate a flashcard with the following fields:
+- Word, Pinyin, and English translation
+- A practical sample usage sentence with English translation
+- Frequency of use
+- 2-3 related words that share patterns or common usage, each with Chinese, pinyin, English, and relationship type
 
-Ensure that fields in each flashcard focuses on clarity and practical usage for an intermediate Chinese student. For related words, focus on words that follow similar patterns or are commonly used together, rather than just words with similar meanings."""
+Focus on practical usage for intermediate students. For related words, prefer words that are commonly used together or follow similar patterns.
+"""
 
 
 def get_generate_flashcard_from_word_prompt(word: str):
