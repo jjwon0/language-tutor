@@ -112,7 +112,13 @@ def list_lesser_known_cards(deck: str, count: int):
     default=False,
     help="Show what would be updated without making changes",
 )
-def fix_cards(deck: Optional[str], dry_run: bool) -> None:
+@click.option(
+    "--limit",
+    type=int,
+    default=None,
+    help="Limit the number of cards to process",
+)
+def fix_cards(deck: Optional[str], dry_run: bool, limit: Optional[int]) -> None:
     """Fix all cards in a deck by regenerating them with latest features.
 
     Only regenerates audio if the sample usage changes.

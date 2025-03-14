@@ -1,3 +1,5 @@
+from typing import Optional
+
 from tutor.utils.anki import AnkiConnectClient
 from tutor.llm_flashcards import (
     generate_flashcards,
@@ -7,7 +9,9 @@ from tutor.llm.prompts import get_generate_flashcard_from_word_prompt
 from tutor.utils.azure import text_to_speech
 
 
-def fix_cards_inner(deck: str, dry_run: bool = False) -> str:
+def fix_cards_inner(
+    deck: str, dry_run: bool = False, limit: Optional[int] = None
+) -> str:
     """Fix all cards in a deck by regenerating them with latest features.
 
     Only regenerates audio if the sample usage changes.
@@ -28,7 +32,13 @@ def fix_cards_inner(deck: str, dry_run: bool = False) -> str:
     if not cards:
         return f"No cards found in deck: {deck}"
 
-    print(f"Found {len(cards)} cards in deck: {deck}")
+    total_cards = len(cards)
+    if limit:
+        cards = cards[:limit]
+        print(f"Found {total_cards} cards in deck: {deck}, processing first {limit}")
+    else:
+        print(f"Found {total_cards} cards in deck: {deck}")
+
     if dry_run:
         print("DRY RUN: No changes will be made")
 
@@ -40,9 +50,9 @@ def fix_cards_inner(deck: str, dry_run: bool = False) -> str:
         "errors": 0,
     }
 
-    for card in cards:
+    for i, card in enumerate(cards, 1):
         try:
-            print(f"\nProcessing card: {card.word}")
+            print(f"\nProcessing card {i}/{len(cards)}: {card.word}")
 
             # Generate new card content
             prompt = get_generate_flashcard_from_word_prompt(card.word)
