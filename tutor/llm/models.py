@@ -3,6 +3,15 @@ from pydantic.json_schema import SkipJsonSchema
 from pydantic import BaseModel, Field
 
 
+class RelatedWord(BaseModel):
+    word: str = Field(description="The related word/phrase in simplified Chinese")
+    pinyin: str = Field(description="The word romanized using Pinyin (lowercased)")
+    english: str = Field(description="The word translated into English (lowercased)")
+    relationship: str = Field(
+        description="Brief description of how this word relates to the main word (e.g., 'synonym', 'similar pattern', 'common collocation')"
+    )
+
+
 class ChineseFlashcard(BaseModel):
     anki_note_id: SkipJsonSchema[Union[int, None]] = None
     word: str = Field(description="The word/phrase in simplified Chinese")
@@ -14,6 +23,10 @@ class ChineseFlashcard(BaseModel):
     sample_usage_english: str = Field(
         description="The sample usage field translated to English"
     )
+    related_words: List[RelatedWord] = Field(
+        default_factory=list,
+        description="List of related words that share similar meaning or patterns",
+    )
     frequency: Literal[
         "very common", "common", "infrequent", "rare", "very rare", None
     ] = Field(
@@ -22,7 +35,7 @@ class ChineseFlashcard(BaseModel):
     )
 
     def __str__(self):
-        return f"""
+        base_str = f"""
 Word: {self.word}
 Pinyin: {self.pinyin}
 English: {self.english}
@@ -30,6 +43,15 @@ Sample Usage: {self.sample_usage}
 Sample Usage (English): {self.sample_usage_english}
 Frequency: {self.frequency}
         """.strip()
+
+        if self.related_words:
+            related_words_str = "\nRelated Words:"
+            for rw in self.related_words:
+                related_words_str += (
+                    f"\n  • {rw.word} ({rw.pinyin}) - {rw.english} [{rw.relationship}]"
+                )
+            return base_str + related_words_str
+        return base_str
 
     @classmethod
     def from_anki_json(cls, anki_json):

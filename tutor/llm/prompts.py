@@ -5,8 +5,13 @@ _FLASHCARD_DESCRIPTION = """
 - Sample Usage: (create a new sentence that uses the word or phrase in context)
 - Sample Usage English: (translate the created sample usage sentence into English)
 - Frequency: (how often the word or phrase is actually used in context)
+- Related Words: (provide 2-3 semantically related words that would be helpful for learning this word, each with:
+  • Chinese word/phrase
+  • Pinyin
+  • English translation
+  • Brief note on relationship (keep it very concise, e.g. 'synonym', 'antonym', 'formal variant', 'casual variant', 'commonly paired'))
 
-Ensure that fields in each flashcard focuses on clarity and practical usage for an intermediate Chinese student."""
+Ensure that fields in each flashcard focuses on clarity and practical usage for an intermediate Chinese student. For related words, focus on words that follow similar patterns or are commonly used together, rather than just words with similar meanings."""
 
 
 def get_generate_flashcard_from_word_prompt(word: str):
