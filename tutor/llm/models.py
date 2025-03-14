@@ -6,9 +6,11 @@ from pydantic import BaseModel, Field
 class RelatedWord(BaseModel):
     word: str = Field(description="The related word/phrase in simplified Chinese")
     pinyin: str = Field(description="The word romanized using Pinyin (lowercased)")
-    english: str = Field(description="The word translated into English (lowercased)")
+    english: str = Field(
+        description="The word translated into English (lowercased), with any important context or nuance in parentheses"
+    )
     relationship: str = Field(
-        description="Brief description of how this word relates to the main word (e.g., 'synonym', 'similar pattern', 'common collocation')"
+        description="Brief note on relationship (e.g., 'synonym', 'antonym', 'formal variant', 'casual variant', 'commonly paired', 'similar pattern'). Focus on words that are commonly used together or follow similar patterns."
     )
 
 
@@ -16,22 +18,24 @@ class ChineseFlashcard(BaseModel):
     anki_note_id: SkipJsonSchema[Union[int, None]] = None
     word: str = Field(description="The word/phrase in simplified Chinese")
     pinyin: str = Field(description="The word romanized using Pinyin (lowercased)")
-    english: str = Field(description="The word translated into English (lowercased)")
+    english: str = Field(
+        description="The word translated into English (lowercased). Include any important context or nuance in parentheses to help distinguish from similar words."
+    )
     sample_usage: str = Field(
-        description="Example sentence with the word which contextualizes it"
+        description="A practical example sentence that shows how the word is naturally used in context. Should be at an intermediate level."
     )
     sample_usage_english: str = Field(
-        description="The sample usage field translated to English"
+        description="Natural English translation of the sample usage sentence"
     )
     related_words: List[RelatedWord] = Field(
         default_factory=list,
-        description="List of related words that share similar meaning or patterns",
+        description="2-3 semantically related words that help learn this word. Focus on words that are commonly used together or follow similar patterns, rather than just synonyms.",
     )
     frequency: Literal[
         "very common", "common", "infrequent", "rare", "very rare", None
     ] = Field(
         default=None,
-        description="Correctly assign one one of the predefined relative frequencies to this word/phrase",
+        description="How often the word is used in modern Chinese",
     )
 
     def __str__(self):

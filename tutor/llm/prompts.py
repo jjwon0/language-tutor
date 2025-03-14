@@ -1,11 +1,8 @@
 _FLASHCARD_DESCRIPTION = """
-Generate a flashcard with the following fields:
-- Word, Pinyin, and English translation
-- A practical sample usage sentence with English translation
-- Frequency of use
-- 2-3 related words that share patterns or common usage, each with Chinese, pinyin, English, and relationship type
-
-Focus on practical usage for intermediate students. For related words, prefer words that are commonly used together or follow similar patterns.
+Generate a Chinese flashcard that helps intermediate students understand:
+1. The word's meaning and usage context
+2. How it's naturally used in sentences
+3. Its relationship to other commonly paired words or words with similar patterns
 """
 
 
