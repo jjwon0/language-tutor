@@ -10,7 +10,10 @@ from tutor.utils.azure import text_to_speech
 
 
 def fix_cards_inner(
-    deck: str, dry_run: bool = False, limit: Optional[int] = None
+    deck: str,
+    dry_run: bool = False,
+    limit: Optional[int] = None,
+    force_update: bool = False,
 ) -> str:
     """Fix all cards in a deck by regenerating them with latest features.
 
@@ -63,6 +66,11 @@ def fix_cards_inner(
                 if field not in fields or not fields[field]:
                     needs_update = True
                     reasons.append(f"missing {field}")
+
+            # Force update if requested
+            if force_update:
+                needs_update = True
+                reasons.append("force update requested")
 
             if not needs_update:
                 print("Card is up to date, skipping...")
