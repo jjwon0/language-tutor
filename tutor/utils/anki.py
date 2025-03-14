@@ -40,6 +40,10 @@ class AnkiAction(Enum):
     DECK_NAMES = "deckNames"
     CREATE_DECK = "createDeck"
     UPDATE_NOTE_FIELDS = "updateNoteFields"
+    MODEL_TEMPLATES = "modelTemplates"
+    MODEL_STYLING = "modelStyling"
+    UPDATE_MODEL_TEMPLATES = "updateModelTemplates"
+    UPDATE_MODEL_STYLING = "updateModelStyling"
 
 
 class AnkiConnectClient:
@@ -149,6 +153,84 @@ class AnkiConnectClient:
         except AnkiConnectError as e:
             raise AnkiConnectError(
                 f"Failed to add flashcard for '{flashcard.word}'", e.action, e.response
+            )
+
+    def update_model_styling(self, model_name: str, css: str) -> None:
+        """Update the CSS styling for a model.
+
+        Args:
+            model_name: Name of the model to update styling for
+            css: The new CSS styling
+        """
+        try:
+            self.send_request(
+                AnkiAction.UPDATE_MODEL_STYLING,
+                {"model": {"name": model_name, "css": css}},
+            )
+        except Exception as e:
+            raise AnkiConnectError(
+                f"Failed to update styling for model '{model_name}'.",
+                AnkiAction.UPDATE_MODEL_STYLING,
+                e,
+            )
+
+    def update_model_templates(self, model_name: str, templates: Dict) -> None:
+        """Update the templates for a model.
+
+        Args:
+            model_name: Name of the model to update templates for
+            templates: Dict containing the new templates
+        """
+        try:
+            self.send_request(
+                AnkiAction.UPDATE_MODEL_TEMPLATES,
+                {"model": {"name": model_name, "templates": templates}},
+            )
+        except Exception as e:
+            raise AnkiConnectError(
+                f"Failed to update templates for model '{model_name}'.",
+                AnkiAction.UPDATE_MODEL_TEMPLATES,
+                e,
+            )
+
+    def get_model_styling(self, model_name: str) -> Dict:
+        """Get the CSS styling for a model.
+
+        Args:
+            model_name: Name of the model to get styling for
+
+        Returns:
+            Dict containing the model's CSS styling
+        """
+        try:
+            return self.send_request(
+                AnkiAction.MODEL_STYLING, {"modelName": model_name}
+            )
+        except Exception as e:
+            raise AnkiConnectError(
+                f"Failed to get styling for model '{model_name}'.",
+                AnkiAction.MODEL_STYLING,
+                e,
+            )
+
+    def get_model_templates(self, model_name: str) -> Dict:
+        """Get the templates (styling, front, back) for a model.
+
+        Args:
+            model_name: Name of the model to get templates for
+
+        Returns:
+            Dict containing the model's templates
+        """
+        try:
+            return self.send_request(
+                AnkiAction.MODEL_TEMPLATES, {"modelName": model_name}
+            )
+        except Exception as e:
+            raise AnkiConnectError(
+                f"Failed to get templates for model '{model_name}'.",
+                AnkiAction.MODEL_TEMPLATES,
+                e,
             )
 
     def update_flashcard(
