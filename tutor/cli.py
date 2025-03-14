@@ -15,6 +15,7 @@ from tutor.commands.regenerate_flashcard import (
 from tutor.commands.list_lesser_known_cards import (
     list_lesser_known_cards_inner,
 )
+from tutor.commands.run_web import run_web
 from tutor.llm_flashcards import GPT_3_5_TURBO, GPT_4, GPT_4o
 from tutor.utils.config import get_config
 
@@ -170,3 +171,7 @@ def config(deck: Optional[str]) -> None:
             click.echo(str(e), err=True)
             click.echo("Use 'config DECK' to set a default deck")
             exit(1)
+
+
+# Add web interface command
+cli.add_command(run_web, name="web")

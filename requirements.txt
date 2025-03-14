@@ -4,3 +4,5 @@ python-dotenv==1.0.0
 PyYAML==6.0.1
 Requests==2.31.0
 click==8.1.8
+flask==3.0.2
+flask-cors==4.0.0
