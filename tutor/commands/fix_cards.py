@@ -46,8 +46,6 @@ def fix_cards_inner(
         "total": len(cards),
         "updated": 0,
         "audio_updated": 0,
-        "skipped": 0,
-        "errors": 0,
     }
 
     for i, card in enumerate(cards, 1):
@@ -89,9 +87,10 @@ def fix_cards_inner(
                     stats["audio_updated"] += 1
         except Exception as e:
             print(f"Error processing card {card.word}: {e}")
-            stats["errors"] += 1
-            stats["skipped"] += 1
-            continue
+            # Fail fast on errors
+            raise Exception(
+                f"Failed to process card {card.word}. Fix any issues and try again."
+            )
 
     # Generate summary
     summary = [
@@ -99,8 +98,6 @@ def fix_cards_inner(
         f"Total cards processed: {stats['total']}",
         f"Cards updated: {stats['updated']}",
         f"Audio files regenerated: {stats['audio_updated']}",
-        f"Cards skipped: {stats['skipped']}",
-        f"Errors encountered: {stats['errors']}",
     ]
 
     if dry_run:
