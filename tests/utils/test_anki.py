@@ -14,7 +14,9 @@ from tutor.llm.models import ChineseFlashcard
 
 @pytest.fixture
 def anki_client():
-    return AnkiConnectClient()
+    # Use a non-existent server address to prevent accidental connections to real Anki
+    # This ensures tests won't modify production data
+    return AnkiConnectClient(address="http://non-existent-anki-test-server:9999")
 
 
 @pytest.fixture
