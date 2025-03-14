@@ -22,7 +22,8 @@ def fix_cards_inner(deck: str, dry_run: bool = False) -> str:
     ankiconnect_client = AnkiConnectClient()
 
     # Get all cards in the deck
-    deck_query = f"deck:{deck}"
+    # Escape colons in deck name for Anki's query syntax
+    deck_query = f'deck:"{deck}"'
     cards = ankiconnect_client.find_notes(deck_query)
     if not cards:
         return f"No cards found in deck: {deck}"
