@@ -105,6 +105,25 @@ def list_lesser_known_cards(deck: str, count: int):
 
 
 @cli.command()
+@click.option("--deck", type=str, default=None, help="Deck to fix cards in")
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Show what would be updated without making changes",
+)
+def fix_cards(deck: Optional[str], dry_run: bool) -> None:
+    """Fix all cards in a deck by regenerating them with latest features.
+
+    Only regenerates audio if the sample usage changes.
+    """
+    from tutor.commands.fix_cards import fix_cards_inner
+
+    deck = deck or get_config().default_deck
+    click.echo(fix_cards_inner(deck, dry_run))
+
+
+@cli.command()
 @click.argument("deck", required=False)
 def config(deck: Optional[str]) -> None:
     """View or set the default deck configuration.
