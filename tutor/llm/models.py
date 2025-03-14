@@ -1,4 +1,4 @@
-from typing import List, Literal, Union
+from typing import List, Literal, Union, ClassVar, Dict
 from pydantic.json_schema import SkipJsonSchema
 from pydantic import BaseModel, Field
 
@@ -15,6 +15,23 @@ class RelatedWord(BaseModel):
 
 
 class ChineseFlashcard(BaseModel):
+    # Map model fields to Anki note fields
+    # Note: Sample Usage (Audio) is handled separately since it's not in the model
+    # Related Words format: 2-3 semantically related words that are commonly used together
+    # Each related word follows format: word (pinyin) - english [relationship]
+    # Example:
+    # • 快乐 (kuài lè) - joyful [synonym]
+    # • 高兴 (gāo xìng) - glad [casual variant]
+    # • 悲伤 (bēi shāng) - sad [antonym]
+    ANKI_FIELD_NAMES: ClassVar[Dict[str, str]] = {
+        "word": "Chinese",
+        "pinyin": "Pinyin",
+        "english": "English",
+        "sample_usage": "Sample Usage",
+        "sample_usage_english": "Sample Usage (English)",
+        "related_words": "Related Words",
+    }
+
     anki_note_id: SkipJsonSchema[Union[int, None]] = None
     word: str = Field(description="The word/phrase in simplified Chinese")
     pinyin: str = Field(description="The word romanized using Pinyin (lowercased)")
@@ -37,6 +54,17 @@ class ChineseFlashcard(BaseModel):
         default=None,
         description="How often the word is used in modern Chinese",
     )
+
+    @classmethod
+    def get_required_anki_fields(cls) -> List[str]:
+        """Get list of required Anki note fields."""
+        fields = [
+            cls.ANKI_FIELD_NAMES[field]
+            for field in cls.model_fields
+            if field not in ["anki_note_id", "frequency"]
+        ]
+        fields.append("Sample Usage (Audio)")
+        return fields
 
     def __str__(self):
         base_str = f"""

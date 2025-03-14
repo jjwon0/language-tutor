@@ -1,5 +1,5 @@
 from typing import Optional
-
+from tutor.llm.models import ChineseFlashcard
 from tutor.utils.anki import AnkiConnectClient
 from tutor.llm_flashcards import (
     generate_flashcards,
@@ -46,11 +46,30 @@ def fix_cards_inner(
         "total": len(cards),
         "updated": 0,
         "audio_updated": 0,
+        "skipped": 0,  # Cards that don't need updates
     }
 
     for i, card in enumerate(cards, 1):
         try:
             print(f"\nProcessing card {i}/{len(cards)}: {card.word}")
+
+            # Check if card needs updates
+            needs_update = False
+            reasons = []
+            fields = ankiconnect_client.get_note_fields(card.anki_note_id)
+
+            # Check if any required fields are missing or empty
+            for field in ChineseFlashcard.get_required_anki_fields():
+                if field not in fields or not fields[field]:
+                    needs_update = True
+                    reasons.append(f"missing {field}")
+
+            if not needs_update:
+                print("Card is up to date, skipping...")
+                stats["skipped"] += 1
+                continue
+
+            print(f"Updates needed: {', '.join(reasons)}")
 
             # Generate new card content
             prompt = get_generate_flashcard_from_word_prompt(card.word)
@@ -97,6 +116,7 @@ def fix_cards_inner(
         f"Card Update Summary for deck '{deck}':",
         f"Total cards processed: {stats['total']}",
         f"Cards updated: {stats['updated']}",
+        f"Cards skipped (up to date): {stats['skipped']}",
         f"Audio files regenerated: {stats['audio_updated']}",
     ]
 

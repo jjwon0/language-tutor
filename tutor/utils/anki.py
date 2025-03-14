@@ -44,6 +44,7 @@ class AnkiAction(Enum):
     MODEL_STYLING = "modelStyling"
     UPDATE_MODEL_TEMPLATES = "updateModelTemplates"
     UPDATE_MODEL_STYLING = "updateModelStyling"
+    NOTE_FIELDS = "notesInfo"  # Used to get fields for a single note
 
 
 class AnkiConnectClient:
@@ -191,6 +192,32 @@ class AnkiConnectClient:
                 f"Failed to update templates for model '{model_name}'.",
                 AnkiAction.UPDATE_MODEL_TEMPLATES,
                 e,
+            )
+
+    def get_note_fields(self, note_id: int) -> Dict[str, str]:
+        """Get the fields of a note by its ID.
+
+        Args:
+            note_id: ID of the note to get fields for
+
+        Returns:
+            Dict mapping field names to their values
+        """
+        try:
+            result = self.send_request(AnkiAction.NOTE_FIELDS, {"notes": [note_id]})
+            if not result or not isinstance(result, list) or len(result) != 1:
+                raise AnkiConnectError(
+                    f"Invalid response format for note ID {note_id}",
+                    AnkiAction.NOTE_FIELDS.value,
+                    result,
+                )
+            # Anki returns fields as {"fieldName": {"value": "content", "order": N}}
+            # Transform to simple {"fieldName": "content"} format
+            fields = result[0]["fields"]
+            return {name: info["value"] for name, info in fields.items()}
+        except AnkiConnectError as e:
+            raise AnkiConnectError(
+                f"Failed to get fields for note ID {note_id}", e.action, e.response
             )
 
     def get_model_styling(self, model_name: str) -> Dict:
