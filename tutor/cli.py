@@ -126,7 +126,7 @@ def fix_cards(deck: Optional[str], dry_run: bool, limit: Optional[int]) -> None:
     from tutor.commands.fix_cards import fix_cards_inner
 
     deck = deck or get_config().default_deck
-    click.echo(fix_cards_inner(deck, dry_run))
+    click.echo(fix_cards_inner(deck, dry_run, limit))
 
 
 @cli.command()
