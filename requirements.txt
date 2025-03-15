@@ -6,3 +6,5 @@ Requests==2.31.0
 click==8.1.8
 flask==3.0.2
 flask-cors==4.0.0
+azure-cognitiveservices-speech==1.35.0
+opencc==1.1.9
