@@ -6,13 +6,17 @@ from tutor.llm_flashcards import (
 from tutor.utils.logging import dprint
 from tutor.llm.prompts import get_generate_flashcard_from_word_prompt
 from tutor.utils.azure import text_to_speech
+from tutor.utils.chinese import to_simplified
 
 
 def regenerate_flashcard_inner(word: str):
+    # Convert traditional characters to simplified for consistency
+    simplified_word = to_simplified(word)
+
     ankiconnect_client = AnkiConnectClient()
-    flashcards = ankiconnect_client.find_notes(get_word_exists_query(word))
+    flashcards = ankiconnect_client.find_notes(get_word_exists_query(simplified_word))
     if not flashcards:
-        print(f"Could not find any cards matching {word}, exiting")
+        print(f"Could not find any cards matching {simplified_word}, exiting")
         return
 
     assert len(flashcards) == 1, "Multiple cards match this query"
@@ -24,7 +28,7 @@ def regenerate_flashcard_inner(word: str):
         return
 
     note_id = flashcard.anki_note_id
-    prompt = get_generate_flashcard_from_word_prompt(word)
+    prompt = get_generate_flashcard_from_word_prompt(simplified_word)
     dprint(prompt)
     flashcards = generate_flashcards(prompt)
     dprint(flashcards)

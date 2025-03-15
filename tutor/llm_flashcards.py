@@ -43,41 +43,50 @@ def get_similar_words_exists_query(word: str):
     return f'"deck:{get_config().default_deck}" Chinese:*{word}*'
 
 
-def maybe_add_flashcards_to_deck(flashcards_container: ChineseFlashcards, deck: str):
-    ankiconnect_client = AnkiConnectClient()
+def maybe_add_flashcards_to_deck(
+    flashcards_container: ChineseFlashcards, deck: str
+) -> bool:
+    """Add flashcards to deck.
 
+    The caller should have already checked if the cards exist in Anki.
+    This function will only ask for confirmation and add the cards.
+
+    Returns:
+        bool: True if any cards were added, False if all cards were skipped
+    """
+    ankiconnect_client = AnkiConnectClient()
     num_added = 0
+
     try:
         for f in flashcards_container.flashcards:
             dprint(f"{f.word}")
-            query = get_word_exists_query(f.word)
-            existing_cards = ankiconnect_client.find_notes(query)
-            if existing_cards:
-                dprint(f" - {len(existing_cards)} similar cards exist(s)! ")
-            else:
-                dprint(" - new card!")
-                print(f)
-                if not get_skip_confirm():
-                    try:
-                        if not input("Add this to deck (y/n)? ").lower().strip() == "y":
-                            dprint(" - skipped")
-                            continue
-                    except (KeyboardInterrupt, EOFError):
-                        print("\nAborted by user")
-                        return
+            print(f)
+
+            if not get_skip_confirm():
                 try:
-                    audio_filepath = text_to_speech(f.sample_usage)
-                    note_id = ankiconnect_client.add_flashcard(deck, f, audio_filepath)
-                    dprint(f" - added with note ID: {note_id}!")
-                    num_added += 1
-                except Exception as e:
-                    print(f"Error adding flashcard for '{f.word}': {str(e)}")
-                    continue
+                    if not input("Add this to deck (y/n)? ").lower().strip() == "y":
+                        dprint(" - skipped")
+                        continue
+                except (KeyboardInterrupt, EOFError):
+                    print("\nAborted by user")
+                    return False
+
+            try:
+                audio_filepath = text_to_speech(f.sample_usage)
+                note_id = ankiconnect_client.add_flashcard(deck, f, audio_filepath)
+                dprint(f" - added with note ID: {note_id}!")
+                num_added += 1
+            except Exception as e:
+                print(f"Error adding flashcard for '{f.word}': {str(e)}")
+                continue
+
     except KeyboardInterrupt:
         print("\nAborted by user")
+        return False
     finally:
         if num_added > 0:
             print(f"Added {num_added} new card(s)!")
+        return num_added > 0
 
 
 def maybe_add_flashcards(flashcards_container: ChineseFlashcards, subdeck: str):

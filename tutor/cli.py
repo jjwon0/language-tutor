@@ -1,5 +1,6 @@
 import click
-from typing import Optional
+import sys
+from typing import Optional, List
 from dotenv import load_dotenv
 
 from tutor.commands.generate_topics import (
@@ -72,13 +73,40 @@ def select_conversation_topic(conversation_topics_path: str):
     click.echo(select_conversation_topic_inner(conversation_topics_path))
 
 
+def read_words_from_stdin() -> List[str]:
+    """Read words from stdin, handling both piped input and interactive input."""
+    if sys.stdin.isatty():
+        # No piped input, return empty list
+        return []
+
+    # Read from stdin and split on whitespace/newlines
+    content = sys.stdin.read().strip()
+    return [word for word in content.split() if word]
+
+
 @cli.command()
-@click.argument("word", type=str)
+@click.argument("words", type=str, nargs=-1)
 @click.option("--deck", type=str, default=None)
-def generate_flashcard_from_word(deck: str, word: str):
-    """Add a new Anki flashcard for a specific WORD to DECK."""
+def generate_flashcard_from_word(deck: str, words: tuple[str, ...]):
+    """Add new Anki flashcards for one or more WORDS to DECK.
+
+    Examples:
+        ct g 你好                    # Single word
+        ct g 你好 再见 谢谢          # Multiple space-separated words
+        echo "你好\n再见" | ct g      # Read from stdin (newline-separated)
+    """
+    # Combine words from arguments and stdin
+    all_words = list(words)
+    stdin_words = read_words_from_stdin()
+    if stdin_words:
+        all_words.extend(stdin_words)
+
+    if not all_words:
+        print("Please provide at least one word")
+        return
+
     deck = deck or get_config().default_deck
-    click.echo(generate_flashcard_from_word_inner(deck, word))
+    click.echo(generate_flashcard_from_word_inner(deck, tuple(all_words)))
 
 
 # Shortcut for the most common action.
