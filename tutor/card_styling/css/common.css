@@ -1,0 +1,74 @@
+.card {
+    font-family: "Helvetica", "Arial", sans-serif;
+    font-size: 28px;
+    text-align: center;
+    color: #333;
+    background-color: #f9f9f9;
+    padding: 20px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.notes {
+    font-family: "Helvetica", "Arial", sans-serif;
+    font-size: 18px;
+    color: #34495e;
+    background-color: #f5f6fa;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px auto;
+    text-align: left;
+    max-width: 95%;
+    box-sizing: border-box;
+}
+
+.audio {
+    font-family: "Helvetica", "Arial", sans-serif;
+    font-size: 16px;
+    color: #3498db;
+    margin-top: 10px;
+}
+
+.audio:hover {
+    color: #2980b9;
+    cursor: pointer;
+}
+
+/* Spacing utilities */
+.spacer { height: 20px; }
+.spacerSmall { height: 5px; }
+.spacerMedium { height: 15px; }
+
+/* Related words section */
+.related-words {
+    font-family: "Helvetica", "Arial", sans-serif;
+    font-size: 18px;
+    color: #34495e;
+    background-color: #f5f6fa;
+    padding: 12px;
+    border-radius: 5px;
+    margin: 10px auto;
+    text-align: left;
+    max-width: 95%;
+    line-height: 1.4;
+    box-sizing: border-box;
+}
+
+.related-words-title {
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    font-size: 18px;
+    display: block;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 5px;
+}
+
+.related-words-content {
+    white-space: pre-wrap;
+    font-family: "Helvetica", "Arial", sans-serif;
+    font-size: 16px;
+    color: #34495e;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
