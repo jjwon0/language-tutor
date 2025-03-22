@@ -4,22 +4,36 @@
     text-align: center;
     color: #333;
     background-color: #f9f9f9;
-    padding: 20px;
-    max-width: 100%;
+    padding: 10px;
+    max-width: 40em;
     box-sizing: border-box;
+}
+
+@media screen and (max-width: 480px) {
+    .card {
+        padding: 10px 0;
+    }
 }
 
 .notes {
     font-family: "Helvetica", "Arial", sans-serif;
     font-size: 18px;
     color: #34495e;
-    background-color: #f5f6fa;
+    background-color: #edf0f7;
     padding: 10px;
     border-radius: 5px;
     margin: 10px auto;
     text-align: left;
     max-width: 95%;
     box-sizing: border-box;
+}
+
+@media screen and (max-width: 480px) {
+    .notes {
+        padding: 10px 0;
+        border-radius: 0;
+        max-width: 100%;
+    }
 }
 
 .audio {
@@ -44,14 +58,22 @@
     font-family: "Helvetica", "Arial", sans-serif;
     font-size: 18px;
     color: #34495e;
-    background-color: #f5f6fa;
-    padding: 12px;
+    background-color: #edf0f7;
+    padding: 10px;
     border-radius: 5px;
     margin: 10px auto;
     text-align: left;
     max-width: 95%;
     line-height: 1.4;
     box-sizing: border-box;
+}
+
+@media screen and (max-width: 480px) {
+    .related-words {
+        padding: 10px 0;
+        border-radius: 0;
+        max-width: 100%;
+    }
 }
 
 .related-words-title {
