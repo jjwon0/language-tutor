@@ -1,5 +1,13 @@
 # Windsurf Rules for chinese-tutor project
 
+## Plan changes and implement them in small, manageable chunks
+
+When you have a large change in mind, first come up with a plan which breaks it down into smaller, manageable chunks that are independent of each other.
+
+Implement each chunk one at a time, testing and verifying that each part works before moving on to the next.
+
+Commit each chunk after it is implemented and verified.
+
 ## Always ensure that the chinese-tutor pyenv virtualenv is activated before running any commands
 
 This ensures that all dependencies are available and commands run in the correct environment.
@@ -24,3 +32,19 @@ This ensures that all code is formatted and linted correctly before it is commit
 
 To check and fix code, run:
   pre-commit run --all-files
+
+## Write commits with a Conventional Commit message
+
+When you are ready to commit, use a Conventional Commit message.
+
+A Conventional Commit message has the following format:
+
+  <type>(<scope>): <subject>
+
+Where:
+  - <type> is one of: `feat`, `fix`, `perf`, `style`, `refactor`, `test`, `docs`, `build`, `ci`, `chore`
+  - <scope> is an optional scope that provides additional context
+  - <subject> is a short description of the change
+
+Example:
+  `feat: add support for Cantonese flashcards`
