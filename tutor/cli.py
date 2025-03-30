@@ -13,9 +13,7 @@ from tutor.commands.generate_flashcard_from_word import (
 from tutor.commands.regenerate_flashcard import (
     regenerate_flashcard_inner,
 )
-from tutor.commands.list_lesser_known_cards import (
-    list_lesser_known_cards_inner,
-)
+from tutor.commands.list_lesser_known_cards import list_lesser_known_cards
 from tutor.commands.run_web import run_web
 from tutor.commands.setup_anki import setup_anki
 from tutor.commands.fix_cards import fix_cards
@@ -136,15 +134,6 @@ cli.add_command(regenerate_flashcard, name="rg")
 
 
 @cli.command()
-@click.option("--deck", type=str, default=None)
-@click.option("--count", type=int, default=5)
-def list_lesser_known_cards(deck: str, count: int):
-    """Regenerate Anki flashcard for a specific WORD."""
-    deck = deck or get_config().default_deck
-    click.echo(list_lesser_known_cards_inner(deck, count))
-
-
-@cli.command()
 @click.argument("deck", required=False)
 def config(deck: Optional[str]) -> None:
     """View or set the default deck configuration.
@@ -169,3 +158,4 @@ def config(deck: Optional[str]) -> None:
 cli.add_command(run_web, name="web")
 cli.add_command(setup_anki, name="setup-anki")
 cli.add_command(fix_cards, name="fix-cards")
+cli.add_command(list_lesser_known_cards, name="list-lesser-known-cards")
