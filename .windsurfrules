@@ -1,13 +1,26 @@
 # Windsurf Rules for chinese-tutor project
 
-Always activate the chinese-tutor pyenv virtualenv before running any commands
+## Always ensure that the chinese-tutor pyenv virtualenv is activated before running any commands
+
+This ensures that all dependencies are available and commands run in the correct environment.
 
 To activate the virtualenv, run:
   pyenv activate chinese-tutor
 
-This ensures that all dependencies are available and commands run in the correct environment.
+To check if the virtualenv is active, run:
+  `python -c "import sys, os; print(sys.prefix);`
+
+And if this says something with `chinese-tutor`, then the virtualenv is active.
+
 If you haven't created this virtualenv yet, you can do so with:
   pyenv virtualenv 3.x.x chinese-tutor
   pyenv local chinese-tutor
 
 Where 3.x.x is your preferred Python version.
+
+## Always run `pre-commit` before declaring a feature as done
+
+This ensures that all code is formatted and linted correctly before it is committed.
+
+To check and fix code, run:
+  pre-commit run --all-files
