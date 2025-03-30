@@ -10,9 +10,7 @@ from tutor.commands.generate_topics import (
 from tutor.commands.generate_flashcard_from_word import (
     generate_flashcard_from_word_inner,
 )
-from tutor.commands.regenerate_flashcard import (
-    regenerate_flashcard_inner,
-)
+from tutor.commands.regenerate_flashcard import regenerate_flashcard
 from tutor.commands.list_lesser_known_cards import list_lesser_known_cards
 from tutor.commands.run_web import run_web
 from tutor.commands.setup_anki import setup_anki
@@ -92,14 +90,8 @@ def generate_flashcard_from_word(deck: str, language: str, words: tuple[str, ...
 cli.add_command(generate_flashcard_from_word, name="g")
 
 
-@cli.command()
-@click.argument("word", type=str)
-def regenerate_flashcard(word: str):
-    """Regenerate Anki flashcard for a specific WORD."""
-    click.echo(regenerate_flashcard_inner(word))
-
-
-# Shortcut for the next-most common action.
+# Add regenerate_flashcard command and shortcut
+cli.add_command(regenerate_flashcard, name="regenerate-flashcard")
 cli.add_command(regenerate_flashcard, name="rg")
 
 
