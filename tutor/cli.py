@@ -28,7 +28,9 @@ load_dotenv()
 )
 @click.option("--debug/--no-debug", default=False, help="Turn on extra debug logging")
 @click.option(
-    "--skip-confirm", type=bool, default=False, help="Skip confirmation for commands"
+    "--skip-confirm/--no-skip-confirm",
+    default=False,
+    help="Skip confirmation for commands",
 )
 def cli(model: str, debug: bool, skip_confirm: bool) -> None:
     """chinese-tutor tool"""
