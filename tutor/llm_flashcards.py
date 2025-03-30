@@ -1,7 +1,8 @@
 from openai import OpenAI
+from typing import List, Type
 from tutor.utils.logging import dprint
 from tutor.utils.anki import AnkiConnectClient, get_subdeck
-from tutor.llm.models import ChineseFlashcards
+from tutor.llm.models import LanguageFlashcard, MandarinFlashcard, CantoneseFlashcard
 from tutor.cli_global_state import get_model, get_skip_confirm
 from tutor.utils.azure import text_to_speech
 from tutor.utils.config import get_config
@@ -11,31 +12,87 @@ GPT_4 = "gpt-4"
 GPT_4o = "gpt-4o"
 
 
-def generate_flashcards(text):
+def generate_flashcards(text, language: str = "mandarin"):
     """
     Generates flashcard content from the given text using OpenAI's GPT model.
 
     :param text: The text from which to generate flashcards.
+    :param language: The language to generate flashcards for ("mandarin" or "cantonese").
     :return: Generated flashcard content.
     """
     openai_client = OpenAI()
 
+    # Select the appropriate flashcard class based on language
+    flashcard_class = get_flashcard_class_for_language(language)
+
     try:
         dprint(text)
-        completion = openai_client.beta.chat.completions.parse(
+        # Use the standard completion API instead of parse
+        completion = openai_client.chat.completions.create(
             model=get_model(),
-            response_format=ChineseFlashcards,
+            response_format={"type": "json_object"},
             messages=[{"role": "user", "content": text}],
             seed=69,
         )
-        dprint(completion.model_dump())
-        dprint(completion.__dict__)
-        return completion.choices[0].message.parsed
+
+        # Extract the JSON content from the response
+        response_content = completion.choices[0].message.content
+        dprint(f"Response content: {response_content}")
+
+        # Parse the JSON content into flashcard objects
+        import json
+        from pydantic import TypeAdapter
+
+        # Parse the JSON response
+        response_data = json.loads(response_content)
+
+        # Handle both single flashcard and list of flashcards
+        if isinstance(response_data, list):
+            flashcards_data = response_data
+        else:
+            # If it's a single object or has a nested structure
+            if "flashcards" in response_data:
+                flashcards_data = response_data["flashcards"]
+            else:
+                # Treat as a single flashcard
+                flashcards_data = [response_data]
+
+        # Use TypeAdapter to convert the JSON data to flashcard objects
+        adapter = TypeAdapter(List[flashcard_class])
+        flashcards = adapter.validate_python(flashcards_data)
+
+        return flashcards
     except Exception as e:
-        print("Error generating flashcards:", e)
+        print(f"Error generating {language} flashcards:", e)
+        import traceback
+
+        traceback.print_exc()
+        return []
 
 
-def get_word_exists_query(word: str):
+def get_flashcard_class_for_language(language: str) -> Type[LanguageFlashcard]:
+    """
+    Returns the appropriate flashcard class for the given language.
+
+    :param language: The language to get the flashcard class for.
+    :return: The flashcard class for the language.
+    """
+    language = language.lower()
+    if language == "cantonese":
+        return CantoneseFlashcard
+    else:
+        # Default to Mandarin
+        return MandarinFlashcard
+
+
+def get_word_exists_query(word: str, language: str = "mandarin"):
+    """
+    Returns a query to check if a word exists in Anki.
+
+    :param word: The word to check for.
+    :param language: The language of the word.
+    :return: An Anki query string.
+    """
     return f'"deck:{get_config().default_deck}" Chinese:{word}'
 
 
@@ -44,7 +101,7 @@ def get_similar_words_exists_query(word: str):
 
 
 def maybe_add_flashcards_to_deck(
-    flashcards_container: ChineseFlashcards, deck: str
+    flashcards: List[LanguageFlashcard], deck: str
 ) -> bool:
     """Add flashcards to deck.
 
@@ -58,7 +115,7 @@ def maybe_add_flashcards_to_deck(
     num_added = 0
 
     try:
-        for f in flashcards_container.flashcards:
+        for f in flashcards:
             dprint(f"{f.word}")
             print(f)
 
@@ -89,7 +146,7 @@ def maybe_add_flashcards_to_deck(
         return num_added > 0
 
 
-def maybe_add_flashcards(flashcards_container: ChineseFlashcards, subdeck: str):
+def maybe_add_flashcards(flashcards: List[LanguageFlashcard], subdeck: str):
     return maybe_add_flashcards_to_deck(
-        flashcards_container, get_subdeck(get_config().default_deck, subdeck)
+        flashcards, get_subdeck(get_config().default_deck, subdeck)
     )

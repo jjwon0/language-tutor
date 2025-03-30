@@ -17,6 +17,7 @@ from tutor.commands.list_lesser_known_cards import (
     list_lesser_known_cards_inner,
 )
 from tutor.commands.run_web import run_web
+from tutor.commands.setup_anki import setup_anki
 from tutor.llm_flashcards import GPT_3_5_TURBO, GPT_4, GPT_4o
 from tutor.utils.config import get_config
 
@@ -87,13 +88,20 @@ def read_words_from_stdin() -> List[str]:
 @cli.command()
 @click.argument("words", type=str, nargs=-1)
 @click.option("--deck", type=str, default=None)
-def generate_flashcard_from_word(deck: str, words: tuple[str, ...]):
+@click.option(
+    "--language",
+    type=click.Choice(["mandarin", "cantonese"]),
+    default=None,
+    help="Language for the flashcard (defaults to config setting)",
+)
+def generate_flashcard_from_word(deck: str, language: str, words: tuple[str, ...]):
     """Add new Anki flashcards for one or more WORDS to DECK.
 
     Examples:
-        ct g 你好                    # Single word
-        ct g 你好 再见 谢谢          # Multiple space-separated words
-        echo "你好\n再见" | ct g      # Read from stdin (newline-separated)
+        ct g 你好                           # Single word (using default language)
+        ct g --language cantonese 你好       # Single word in Cantonese
+        ct g 你好 再见 谢谢                 # Multiple space-separated words
+        echo "你好\n再见" | ct g             # Read from stdin (newline-separated)
     """
     # Combine words from arguments and stdin
     all_words = list(words)
@@ -105,8 +113,10 @@ def generate_flashcard_from_word(deck: str, words: tuple[str, ...]):
         print("Please provide at least one word")
         return
 
+    # Use provided values or defaults from config
     deck = deck or get_config().default_deck
-    click.echo(generate_flashcard_from_word_inner(deck, tuple(all_words)))
+    language = language or get_config().default_language
+    click.echo(generate_flashcard_from_word_inner(deck, tuple(all_words), language))
 
 
 # Shortcut for the most common action.
@@ -203,3 +213,6 @@ def config(deck: Optional[str]) -> None:
 
 # Add web interface command
 cli.add_command(run_web, name="web")
+
+# Add setup-anki command
+cli.add_command(setup_anki, name="setup-anki")

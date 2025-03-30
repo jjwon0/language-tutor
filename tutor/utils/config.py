@@ -46,6 +46,25 @@ class Config:
         self._config["default_deck"] = value
         self.save_config(self._config)
 
+    @property
+    def default_language(self) -> str:
+        """Get the default language for flashcards.
+
+        Returns:
+            str: The default language ("mandarin" or "cantonese"). Defaults to "mandarin".
+        """
+        return self._config.get("default_language", "mandarin")
+
+    @default_language.setter
+    def default_language(self, value: str) -> None:
+        """Set the default language for flashcards.
+
+        Args:
+            value: The default language ("mandarin" or "cantonese").
+        """
+        self._config["default_language"] = value.lower()
+        self.save_config(self._config)
+
 
 # Singleton instance
 _config: Optional[Config] = None

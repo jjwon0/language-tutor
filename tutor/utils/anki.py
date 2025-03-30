@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 
 import requests
 
-from tutor.llm.models import ChineseFlashcard
+from tutor.llm.models import LanguageFlashcard
 
 
 class AnkiConnectError(Exception):
@@ -45,6 +45,10 @@ class AnkiAction(Enum):
     UPDATE_MODEL_TEMPLATES = "updateModelTemplates"
     UPDATE_MODEL_STYLING = "updateModelStyling"
     NOTE_FIELDS = "notesInfo"  # Used to get fields for a single note
+    MODEL_NAMES = "modelNames"  # Get all model names
+    CREATE_MODEL = "createModel"  # Create a new model
+    MODEL_FIELD_NAMES = "modelFieldNames"  # Get field names for a model
+    DELETE_MODEL = "deleteModelAndNotes"  # Delete a model and its notes
 
 
 class AnkiConnectClient:
@@ -83,11 +87,11 @@ class AnkiConnectClient:
                 "Invalid JSON response from AnkiConnect", action.value
             )
 
-    def get_note_details(self, note_ids: List[int]) -> List[ChineseFlashcard]:
+    def get_note_details(self, note_ids: List[int]) -> List[LanguageFlashcard]:
         """Get detailed information about notes by their IDs."""
         try:
             note_details = self.send_request(AnkiAction.NOTES_INFO, {"notes": note_ids})
-            return [ChineseFlashcard.from_anki_json(nd) for nd in note_details]
+            return [LanguageFlashcard.from_anki_json(nd) for nd in note_details]
         except AnkiConnectError as e:
             raise AnkiConnectError(
                 f"Failed to get note details for IDs: {note_ids}", e.action, e.response
@@ -102,7 +106,7 @@ class AnkiConnectClient:
                 f"Failed to find notes with query: {query}", e.action, e.response
             )
 
-    def find_notes(self, query: str) -> List[ChineseFlashcard]:
+    def find_notes(self, query: str) -> List[LanguageFlashcard]:
         """Search for and fetch notes by query."""
         try:
             note_ids = self.find_note_ids(query)
@@ -114,27 +118,53 @@ class AnkiConnectClient:
                 e.response,
             )
 
-    def add_flashcard(self, deck_name, flashcard, audio_filepath):
-        """Add a new flashcard and return its note ID."""
+    def add_flashcard(self, deck_name, flashcard: LanguageFlashcard, audio_filepath):
+        """Add a new flashcard and return its note ID.
+
+        Args:
+            deck_name: The name of the deck to add the flashcard to
+            flashcard: The flashcard to add (MandarinFlashcard or CantoneseFlashcard)
+            audio_filepath: Path to the audio file for the sample usage
+
+        Returns:
+            The note ID of the added flashcard
+        """
         try:
+            # Check if the note type exists for this language
+            note_type_manager = NoteTypeManager(self)
+            model_name = note_type_manager.check_note_type_exists(flashcard.LANGUAGE)
+
+            # Get the fields required by this flashcard type
+            fields = {}
+            for field_name, anki_field_name in flashcard.ANKI_FIELD_NAMES.items():
+                # Skip fields that don't exist on this flashcard
+                if hasattr(flashcard, field_name):
+                    value = getattr(flashcard, field_name)
+                    fields[anki_field_name] = value
+
+            # Handle related words specially - this is not in ANKI_FIELD_NAMES mapping
+            if hasattr(flashcard, "related_words") and flashcard.related_words:
+                # Format each related word as a bullet point
+                related_words_text = []
+                for rw in flashcard.related_words:
+                    # Format: word (pronunciation) - english [relationship]
+                    pronunciation_field = (
+                        "pinyin" if flashcard.LANGUAGE == "mandarin" else "jyutping"
+                    )
+                    pronunciation = getattr(rw, pronunciation_field)
+                    related_words_text.append(
+                        f"• {rw.word} ({pronunciation}) - {rw.english} [{rw.relationship}]"
+                    )
+
+                fields["Related Words"] = "\n".join(related_words_text)
+
+            # Make sure the deck exists
+            self.maybe_add_deck(deck_name)
+
             note = {
                 "deckName": deck_name,
-                "modelName": "chinese-tutor",
-                "fields": {
-                    "Chinese": flashcard.word,
-                    "Pinyin": flashcard.pinyin,
-                    "English": flashcard.english,
-                    "Sample Usage": flashcard.sample_usage,
-                    "Sample Usage (English)": flashcard.sample_usage_english,
-                    "Related Words": (
-                        "\n".join(
-                            f"{w.word} ({w.pinyin}) - {w.english} [{w.relationship}]"
-                            for w in flashcard.related_words
-                        )
-                    )
-                    if flashcard.related_words
-                    else "",
-                },
+                "modelName": model_name,
+                "fields": fields,
                 "tags": [],
                 "audio": [
                     {
@@ -279,29 +309,45 @@ class AnkiConnectClient:
     def update_flashcard(
         self,
         note_id: int,
-        flashcard: ChineseFlashcard,
+        flashcard: LanguageFlashcard,
         audio_filepath: Optional[str] = None,
     ) -> None:
-        """Update an existing flashcard."""
+        """Update an existing flashcard.
+
+        Args:
+            note_id: The ID of the note to update
+            flashcard: The updated flashcard data
+            audio_filepath: Optional path to the audio file for the sample usage
+        """
         try:
+            # Prepare fields based on the flashcard's ANKI_FIELD_NAMES mapping
+            fields = {}
+            for field_name, anki_field_name in flashcard.ANKI_FIELD_NAMES.items():
+                # Skip fields that don't exist on this flashcard
+                if hasattr(flashcard, field_name):
+                    value = getattr(flashcard, field_name)
+                    fields[anki_field_name] = value
+
+            # Handle related words specially - this is not in ANKI_FIELD_NAMES mapping
+            if hasattr(flashcard, "related_words") and flashcard.related_words:
+                # Format each related word as a bullet point
+                related_words_text = []
+                for rw in flashcard.related_words:
+                    # Format: word (pronunciation) - english [relationship]
+                    pronunciation_field = (
+                        "pinyin" if flashcard.LANGUAGE == "mandarin" else "jyutping"
+                    )
+                    pronunciation = getattr(rw, pronunciation_field)
+                    related_words_text.append(
+                        f"• {rw.word} ({pronunciation}) - {rw.english} [{rw.relationship}]"
+                    )
+
+                fields["Related Words"] = "\n".join(related_words_text)
+
             payload = {
                 "note": {
                     "id": note_id,
-                    "fields": {
-                        "Chinese": flashcard.word,
-                        "Pinyin": flashcard.pinyin,
-                        "English": flashcard.english,
-                        "Sample Usage": flashcard.sample_usage,
-                        "Sample Usage (English)": flashcard.sample_usage_english,
-                        "Related Words": "\n".join(
-                            [
-                                f"{w.word} ({w.pinyin}) - {w.english} [{w.relationship}]"
-                                for w in flashcard.related_words
-                            ]
-                        )
-                        if flashcard.related_words
-                        else "",
-                    },
+                    "fields": fields,
                 }
             }
 
@@ -357,6 +403,204 @@ class AnkiConnectClient:
 
 def get_subdeck(base_deck_name: str, subdeck_name: str):
     return f"{base_deck_name}::{subdeck_name}"
+
+
+class NoteTypeManager:
+    """Manages the verification of note types for different languages."""
+
+    def __init__(self, client: AnkiConnectClient):
+        self.client = client
+
+    def check_note_type_exists(self, language: str) -> str:
+        """Check if the note type for the given language exists in Anki.
+
+        This does NOT create the note type if it doesn't exist.
+
+        Args:
+            language: The language to check the note type for ("mandarin" or "cantonese")
+
+        Returns:
+            The name of the note type if it exists
+
+        Raises:
+            AnkiConnectError: If the note type doesn't exist
+        """
+        # Determine the model name
+        model_name = f"chinese-tutor-{language}"
+
+        try:
+            # Check if the model already exists
+            models = self.client.send_request(AnkiAction.MODEL_NAMES, {})
+            if model_name in models:
+                return model_name
+            else:
+                raise AnkiConnectError(
+                    f"Note type '{model_name}' does not exist in Anki. "
+                    f"Please run the setup script to create the required note types: "
+                    f"./ct setup-anki"
+                )
+        except Exception as e:
+            if isinstance(e, AnkiConnectError):
+                raise e
+            raise AnkiConnectError(
+                f"Failed to check if note type '{model_name}' exists",
+                AnkiAction.MODEL_NAMES.value,
+                str(e),
+            )
+
+    def create_note_type(self, language: str) -> str:
+        """Create a note type for the given language in Anki.
+
+        Args:
+            language: The language to create the note type for ("mandarin" or "cantonese")
+
+        Returns:
+            The name of the created note type
+        """
+        # Get the appropriate flashcard class for this language
+        from tutor.llm_flashcards import get_flashcard_class_for_language
+
+        flashcard_class = get_flashcard_class_for_language(language)
+
+        # Determine the model name
+        model_name = f"chinese-tutor-{language}"
+
+        try:
+            # Get the field names from the flashcard class
+            fields = list(flashcard_class.ANKI_FIELD_NAMES.values())
+            # Add fields that aren't in the mapping
+            fields.append("Sample Usage (Audio)")
+            fields.append("Related Words")
+
+            # Get the field mappings for templates
+            word_field = flashcard_class.ANKI_FIELD_NAMES["word"]
+
+            # Get the pronunciation field name based on language
+            if language.lower() == "mandarin":
+                pronunciation_field = flashcard_class.ANKI_FIELD_NAMES["pinyin"]
+            elif language.lower() == "cantonese":
+                pronunciation_field = flashcard_class.ANKI_FIELD_NAMES["jyutping"]
+            else:
+                # Default to a generic name
+                pronunciation_field = "Pronunciation"
+
+            english_field = flashcard_class.ANKI_FIELD_NAMES["english"]
+            sample_usage_field = flashcard_class.ANKI_FIELD_NAMES["sample_usage"]
+            sample_usage_english_field = flashcard_class.ANKI_FIELD_NAMES[
+                "sample_usage_english"
+            ]
+
+            # Create language-specific templates
+            front_template = f"""
+<div class="chinese">{{{{{word_field}}}}}</div>
+"""
+
+            back_template = f"""
+<div class="chinese">{{{{{word_field}}}}}</div>
+<div class="pronunciation">{{{{{pronunciation_field}}}}}</div>
+<div class="english">{{{{{english_field}}}}}</div>
+
+<hr>
+
+<div class="sample">{{{{{sample_usage_field}}}}}</div>
+<div class="sample-english">{{{{{sample_usage_english_field}}}}}</div>
+{{{{Sample Usage (Audio)}}}}
+
+<hr>
+
+<div class="related-words">{{{{Related Words}}}}</div>
+"""
+
+            # Create the model
+            self.client.send_request(
+                AnkiAction.CREATE_MODEL,
+                {
+                    "modelName": model_name,
+                    "inOrderFields": fields,
+                    "css": DEFAULT_CSS,
+                    "cardTemplates": [
+                        {
+                            "Name": "Card 1",
+                            "Front": front_template,
+                            "Back": back_template,
+                        }
+                    ],
+                },
+            )
+
+            return model_name
+        except Exception as e:
+            raise AnkiConnectError(
+                f"Failed to create note type for {language}",
+                AnkiAction.CREATE_MODEL.value,
+                str(e),
+            )
+
+
+# Default templates for Anki note types
+DEFAULT_CSS = """
+.card {
+    font-family: arial;
+    font-size: 20px;
+    text-align: center;
+    color: black;
+    background-color: white;
+}
+
+.chinese {
+    font-size: 40px;
+}
+
+.pronunciation {
+    font-size: 24px;
+    color: #7286D3;
+}
+
+.english {
+    font-size: 24px;
+    color: #555;
+}
+
+.sample {
+    font-size: 22px;
+    margin-top: 20px;
+    text-align: left;
+}
+
+.sample-english {
+    font-size: 18px;
+    color: #555;
+    text-align: left;
+}
+
+.related-words {
+    font-size: 18px;
+    margin-top: 20px;
+    text-align: left;
+}
+"""
+
+# These templates are now generated dynamically in ensure_note_type_exists
+# based on the language-specific field names
+DEFAULT_FRONT_TEMPLATE = """
+<div class="chinese">{{Word}}</div>
+"""
+
+DEFAULT_BACK_TEMPLATE = """
+<div class="chinese">{{Word}}</div>
+<div class="pronunciation">{{Pinyin}}</div>
+<div class="english">{{English}}</div>
+
+<hr>
+
+<div class="sample">{{Sample Usage}}</div>
+<div class="sample-english">{{Sample Usage (English)}}</div>
+{{Sample Usage (Audio)}}
+
+<hr>
+
+<div class="related-words">{{Related Words}}</div>
+"""
 
 
 def get_default_anki_media_dir() -> Path:

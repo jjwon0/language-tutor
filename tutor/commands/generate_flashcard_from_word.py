@@ -9,7 +9,9 @@ from tutor.utils.logging import dprint
 from tutor.utils.chinese import to_simplified
 
 
-def generate_flashcard_from_word_inner(deck: str, words: tuple[str, ...]) -> None:
+def generate_flashcard_from_word_inner(
+    deck: str, words: tuple[str, ...], language: str = "mandarin"
+) -> None:
     """Generate flashcards for one or more words.
 
     For each word:
@@ -17,6 +19,11 @@ def generate_flashcard_from_word_inner(deck: str, words: tuple[str, ...]) -> Non
     2. Check if the card already exists in Anki
     3. Generate flashcard content using OpenAI if needed
     4. Add the flashcard to Anki if it doesn't already exist
+
+    Args:
+        deck: The Anki deck to add flashcards to
+        words: The words to generate flashcards for
+        language: The language to generate flashcards for ("mandarin" or "cantonese")
     """
     ankiconnect_client = AnkiConnectClient()
     total = len(words)
@@ -29,24 +36,22 @@ def generate_flashcard_from_word_inner(deck: str, words: tuple[str, ...]) -> Non
             print(f"\nProcessing word {i}/{total}: {word}")
 
         # Check if card already exists
-        existing_cards = ankiconnect_client.find_notes(get_word_exists_query(word))
+        existing_cards = ankiconnect_client.find_notes(
+            get_word_exists_query(word, language)
+        )
         if existing_cards:
             print(f"Card for '{word}' exists already:\n{existing_cards[0]}")
             continue
 
         # Generate new card content
-        prompt = get_generate_flashcard_from_word_prompt(word)
+        prompt = get_generate_flashcard_from_word_prompt(word, language)
         dprint(prompt)
-        flashcards = generate_flashcards(prompt)
+        flashcards = generate_flashcards(prompt, language)
         dprint(flashcards)
 
         if maybe_add_flashcards_to_deck(flashcards, deck):
             # Use the actual word from the generated flashcard
-            new_word = (
-                flashcards.flashcards[0].word
-                if flashcards and flashcards.flashcards
-                else word
-            )
-            print(f"Added new flashcard for '{new_word}'")
+            new_word = flashcards[0].word if flashcards else word
+            print(f"Added new flashcard for '{new_word}' in {language}")
         else:
             print(f"No new flashcard added for '{word}'")
