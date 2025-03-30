@@ -131,6 +131,8 @@ class AnkiConnectClient:
         """
         try:
             # Check if the note type exists for this language
+            from tutor.commands.setup_anki import NoteTypeManager
+
             note_type_manager = NoteTypeManager(self)
             model_name = note_type_manager.check_note_type_exists(flashcard.LANGUAGE)
 
@@ -405,116 +407,7 @@ def get_subdeck(base_deck_name: str, subdeck_name: str):
     return f"{base_deck_name}::{subdeck_name}"
 
 
-class NoteTypeManager:
-    """Manages the verification of note types for different languages."""
-
-    def __init__(self, client: AnkiConnectClient):
-        self.client = client
-
-    def check_note_type_exists(self, language: str) -> str:
-        """Check if the note type for the given language exists in Anki.
-
-        This does NOT create the note type if it doesn't exist.
-
-        Args:
-            language: The language to check the note type for ("mandarin" or "cantonese")
-
-        Returns:
-            The name of the note type if it exists
-
-        Raises:
-            AnkiConnectError: If the note type doesn't exist
-        """
-        # Determine the model name
-        model_name = f"chinese-tutor-{language}"
-
-        try:
-            # Check if the model already exists
-            models = self.client.send_request(AnkiAction.MODEL_NAMES, {})
-            if model_name in models:
-                return model_name
-            else:
-                raise AnkiConnectError(
-                    f"Note type '{model_name}' does not exist in Anki. "
-                    f"Please run the setup script to create the required note types: "
-                    f"./ct setup-anki"
-                )
-        except Exception as e:
-            if isinstance(e, AnkiConnectError):
-                raise e
-            raise AnkiConnectError(
-                f"Failed to check if note type '{model_name}' exists",
-                AnkiAction.MODEL_NAMES.value,
-                str(e),
-            )
-
-    def create_note_type(self, language: str) -> str:
-        """Create a note type for the given language in Anki.
-
-        Args:
-            language: The language to create the note type for ("mandarin" or "cantonese")
-
-        Returns:
-            The name of the created note type
-        """
-        # Get the appropriate flashcard class for this language
-        from tutor.llm_flashcards import get_flashcard_class_for_language
-
-        flashcard_class = get_flashcard_class_for_language(language)
-
-        # Determine the model name
-        model_name = f"chinese-tutor-{language}"
-
-        try:
-            # Get the field names from the flashcard class
-            fields = list(flashcard_class.ANKI_FIELD_NAMES.values())
-            # Add fields that aren't in the mapping
-            fields.append("Sample Usage (Audio)")
-            fields.append("Related Words")
-
-            # Get the card templates for this language
-            from tutor.commands.update_card_styling import (
-                get_card_templates,
-                get_card_css,
-            )
-
-            # Get the templates and CSS
-            templates = get_card_templates(language)
-            css = get_card_css(language)
-
-            # Create the model with both Chinese front and English front templates
-            self.client.send_request(
-                AnkiAction.CREATE_MODEL,
-                {
-                    "modelName": model_name,
-                    "inOrderFields": fields,
-                    "css": css,
-                    "cardTemplates": [
-                        {
-                            "Name": "Chinese front",
-                            "Front": templates["Chinese front"]["Front"],
-                            "Back": templates["Chinese front"]["Back"],
-                        },
-                        {
-                            "Name": "English front",
-                            "Front": templates["English front"]["Front"],
-                            "Back": templates["English front"]["Back"],
-                        },
-                    ],
-                },
-            )
-
-            print(
-                f"Created note type '{model_name}' with Chinese front and English front templates."
-            )
-
-            return model_name
-        except Exception as e:
-            raise AnkiConnectError(
-                f"Failed to create note type for {language}",
-                AnkiAction.CREATE_MODEL.value,
-                str(e),
-            )
+# Note: The NoteTypeManager class has been moved to tutor/commands/setup_anki.py
 
 
 def get_default_anki_media_dir() -> Path:

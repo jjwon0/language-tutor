@@ -4,8 +4,8 @@ This module provides a command to update the styling of Anki cards without
 modifying the content of the cards themselves.
 """
 
-from pathlib import Path
 from tutor.utils.anki import AnkiConnectClient
+from tutor.commands.setup_anki import get_card_css, get_card_templates
 
 
 def update_card_styling_inner(model_name: str = "chinese-tutor") -> str:
@@ -35,61 +35,4 @@ def update_card_styling_inner(model_name: str = "chinese-tutor") -> str:
     return f"Card styling updated successfully for model '{model_name}'."
 
 
-def get_card_css(language: str = "mandarin") -> str:
-    """Get the CSS for the card styling based on language.
-
-    Args:
-        language: The language to get CSS for ("mandarin" or "cantonese").
-
-    Returns:
-        str: The CSS for the card styling.
-    """
-    base_dir = Path(__file__).parent.parent / "card_styling" / "css"
-
-    # Common CSS files for all languages
-    css_files = ["common.css", "english_front.css"]
-
-    # Add language-specific CSS file
-    if language.lower() == "mandarin":
-        css_files.append("mandarin_front.css")
-    elif language.lower() == "cantonese":
-        css_files.append("cantonese_front.css")
-
-    combined_css = []
-    for css_file in css_files:
-        try:
-            with open(base_dir / css_file) as f:
-                combined_css.append(f.read())
-        except FileNotFoundError:
-            print(f"Warning: CSS file {css_file} not found, skipping")
-
-    return "\n\n".join(combined_css)
-
-
-def get_card_templates(language: str = "mandarin") -> dict:
-    """Get the templates for the card styling based on language.
-
-    Args:
-        language: The language to get templates for ("mandarin" or "cantonese").
-
-    Returns:
-        dict: The templates for the card styling.
-    """
-    base_dir = Path(__file__).parent.parent / "card_styling" / "templates" / language
-    templates = {}
-
-    # Load Chinese front templates
-    with open(base_dir / "chinese_front_front.html") as f:
-        chinese_front = f.read()
-    with open(base_dir / "chinese_front_back.html") as f:
-        chinese_back = f.read()
-    templates["Chinese front"] = {"Front": chinese_front, "Back": chinese_back}
-
-    # Load English front templates
-    with open(base_dir / "english_front_front.html") as f:
-        english_front = f.read()
-    with open(base_dir / "english_front_back.html") as f:
-        english_back = f.read()
-    templates["English front"] = {"Front": english_front, "Back": english_back}
-
-    return templates
+# Note: get_card_css and get_card_templates functions are now imported from setup_anki.py

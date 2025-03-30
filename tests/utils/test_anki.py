@@ -33,7 +33,9 @@ def sample_flashcard():
 
 def test_add_flashcard(anki_client, sample_flashcard):
     # Mock the NoteTypeManager.check_note_type_exists method to return a model name
-    with patch("tutor.utils.anki.NoteTypeManager.check_note_type_exists") as mock_check:
+    with patch(
+        "tutor.commands.setup_anki.NoteTypeManager.check_note_type_exists"
+    ) as mock_check:
         # Configure the mock to return the model name
         mock_check.return_value = "chinese-tutor-mandarin"
 
