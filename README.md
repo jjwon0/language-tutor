@@ -29,9 +29,11 @@ A CLI tool to help generate and manage Chinese language flashcards in Anki.
    cp config-template.yaml ~/.config/chinese-tutor/config.yaml
    ```
 
-   Edit the config file to set your default Anki deck:
+   Edit the config file to set your configuration:
    ```yaml
    default_deck: "Your::Deck::Name"
+   default_language: "mandarin"  # or "cantonese"
+   learner_level: "intermediate"  # or "beginner", "advanced", etc.
    ```
 
    You can also manage configuration via CLI:
@@ -41,6 +43,12 @@ A CLI tool to help generate and manage Chinese language flashcards in Anki.
 
    # Set default deck
    ./ct config "Your::Deck::Name"
+
+   # Set default language
+   ./ct config --language "mandarin"
+
+   # Set learner level (affects difficulty of generated content)
+   ./ct config --learner-level "intermediate"
    ```
 
 4. **OpenAI Setup**

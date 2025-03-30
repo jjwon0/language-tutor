@@ -1,5 +1,14 @@
-# Default deck for flashcard operations
+# Configuration for chinese-tutor
 # Copy this file to:
 #   Windows: %APPDATA%\chinese-tutor\config.yaml
 #   Unix/Mac: ~/.config/chinese-tutor/config.yaml
+
+# Default deck for flashcard operations
 default_deck: "Chinese::My Cards"
+
+# Default language for flashcards (mandarin or cantonese)
+default_language: "mandarin"
+
+# Learner level - affects difficulty of generated content
+# Options: beginner, intermediate, advanced, etc.
+learner_level: "intermediate"
