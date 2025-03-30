@@ -59,13 +59,12 @@ def generate_flashcard_from_word(
     deck_name = deck or get_config().default_deck
     lang = language or get_config().default_language
 
-    result = _generate_flashcard_from_word_impl(deck_name, tuple(all_words), lang)
-    click.echo(result)
+    _generate_flashcard_from_word_impl(deck_name, tuple(all_words), lang)
 
 
 def _generate_flashcard_from_word_impl(
     deck: str, words: tuple[str, ...], language: str = "mandarin"
-) -> str:
+) -> None:
     """Implementation of generate_flashcard_from_word command.
 
     For each word:
@@ -78,27 +77,23 @@ def _generate_flashcard_from_word_impl(
         deck: The Anki deck to add flashcards to
         words: The words to generate flashcards for
         language: The language to generate flashcards for ("mandarin" or "cantonese")
-
-    Returns:
-        A summary of the operation results
     """
     ankiconnect_client = AnkiConnectClient()
     total = len(words)
-    results = []
 
     for i, word in enumerate(words, 1):
         # Process word based on language (simplified for Mandarin, traditional for Cantonese)
         word = LanguagePreprocessor.process_for_language(word, language)
 
         if total > 1:
-            results.append(f"\nProcessing word {i}/{total}: {word}")
+            click.echo(f"\nProcessing word {i}/{total}: {word}")
 
         # Check if card already exists
         existing_cards = ankiconnect_client.find_notes(
             get_word_exists_query(word, language)
         )
         if existing_cards:
-            results.append(f"Card for '{word}' exists already:\n{existing_cards[0]}")
+            click.echo(f"Card for '{word}' exists already:\n{existing_cards[0]}")
             continue
 
         # Generate new card content
@@ -107,13 +102,5 @@ def _generate_flashcard_from_word_impl(
         flashcards = generate_flashcards(prompt, language)
         dprint(flashcards)
 
-        if maybe_add_flashcards_to_deck(flashcards, deck):
-            # Use the actual word from the generated flashcard
-            new_word = (
-                flashcards[0].word if flashcards and len(flashcards) > 0 else word
-            )
-            results.append(f"Added new flashcard for '{new_word}' in {language}")
-        else:
-            results.append(f"No new flashcard added for '{word}'")
-
-    return "\n".join(results)
+        if not maybe_add_flashcards_to_deck(flashcards, deck):
+            click.echo(f"No new flashcard added for '{word}'")

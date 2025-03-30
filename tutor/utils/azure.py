@@ -33,11 +33,15 @@ def text_to_speech(text):
 
     # Check result
     if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
-        print(f"Speech synthesis succeeded. Audio saved to: {filename}")
+        from tutor.utils.logging import dprint
+
+        dprint(f"Speech synthesis succeeded. Audio saved to: {filename}")
     elif result.reason == speechsdk.ResultReason.Canceled:
         cancellation_details = result.cancellation_details
-        print(f"Speech synthesis canceled: {cancellation_details.reason}")
+        from tutor.utils.logging import dprint
+
+        dprint(f"Speech synthesis canceled: {cancellation_details.reason}")
         if cancellation_details.reason == speechsdk.CancellationReason.Error:
-            print(f"Error details: {cancellation_details.error_details}")
+            dprint(f"Error details: {cancellation_details.error_details}")
 
     return filename

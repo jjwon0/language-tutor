@@ -117,6 +117,7 @@ def maybe_add_flashcards_to_deck(
     try:
         for f in flashcards:
             dprint(f"{f.word}")
+            # Print the flashcard details
             print(f)
 
             if not get_skip_confirm():
@@ -133,6 +134,7 @@ def maybe_add_flashcards_to_deck(
                 note_id = ankiconnect_client.add_flashcard(deck, f, audio_filepath)
                 dprint(f" - added with note ID: {note_id}!")
                 num_added += 1
+                print(f"Added {num_added} new card(s)!")
             except Exception as e:
                 print(f"Error adding flashcard for '{f.word}': {str(e)}")
                 continue
@@ -141,8 +143,6 @@ def maybe_add_flashcards_to_deck(
         print("\nAborted by user")
         return False
     finally:
-        if num_added > 0:
-            print(f"Added {num_added} new card(s)!")
         return num_added > 0
 
 
