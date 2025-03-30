@@ -73,29 +73,22 @@ def setup_anki(languages: str):
                         print(
                             f"Note type '{model_name}' exists but is missing fields: {', '.join(missing_fields)}"
                         )
-                        print(f"Recreating note type '{model_name}'...")
-
-                        # Delete the existing note type
-                        client.send_request(
-                            AnkiAction.DELETE_MODEL, {"modelName": model_name}
+                        print(
+                            f"Note type '{model_name}' needs to be updated but we won't delete it as it might have associated notes."
                         )
-                        print(f"Deleted existing note type '{model_name}'")
+                        print(
+                            "Please use the update-card-styling command to update the templates."
+                        )
+                        continue
                 except Exception as e:
                     print(f"Error checking fields for note type '{model_name}': {e}")
-                    print(f"Recreating note type '{model_name}'...")
-
-                    # Delete the existing note type
-                    try:
-                        client.send_request(
-                            AnkiAction.DELETE_MODEL, {"modelName": model_name}
-                        )
-                        print(f"Deleted existing note type '{model_name}'")
-                    except Exception as delete_error:
-                        print(
-                            f"Error deleting note type '{model_name}': {delete_error}"
-                        )
-                        print(f"Skipping recreation of note type '{model_name}'")
-                        continue
+                    print(
+                        f"Note type '{model_name}' might need to be updated but we won't delete it as it might have associated notes."
+                    )
+                    print(
+                        "Please use the update-card-styling command to update the templates."
+                    )
+                    continue
 
             # Create note type
             note_type_manager.create_note_type(language)

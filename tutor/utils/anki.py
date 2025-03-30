@@ -472,60 +472,40 @@ class NoteTypeManager:
             fields.append("Sample Usage (Audio)")
             fields.append("Related Words")
 
-            # Get the field mappings for templates
-            word_field = flashcard_class.ANKI_FIELD_NAMES["word"]
+            # Get the card templates for this language
+            from tutor.commands.update_card_styling import (
+                get_card_templates,
+                get_card_css,
+            )
 
-            # Get the pronunciation field name based on language
-            if language.lower() == "mandarin":
-                pronunciation_field = flashcard_class.ANKI_FIELD_NAMES["pinyin"]
-            elif language.lower() == "cantonese":
-                pronunciation_field = flashcard_class.ANKI_FIELD_NAMES["jyutping"]
-            else:
-                # Default to a generic name
-                pronunciation_field = "Pronunciation"
+            # Get the templates and CSS
+            templates = get_card_templates(language)
+            css = get_card_css(language)
 
-            english_field = flashcard_class.ANKI_FIELD_NAMES["english"]
-            sample_usage_field = flashcard_class.ANKI_FIELD_NAMES["sample_usage"]
-            sample_usage_english_field = flashcard_class.ANKI_FIELD_NAMES[
-                "sample_usage_english"
-            ]
-
-            # Create language-specific templates
-            front_template = f"""
-<div class="chinese">{{{{{word_field}}}}}</div>
-"""
-
-            back_template = f"""
-<div class="chinese">{{{{{word_field}}}}}</div>
-<div class="pronunciation">{{{{{pronunciation_field}}}}}</div>
-<div class="english">{{{{{english_field}}}}}</div>
-
-<hr>
-
-<div class="sample">{{{{{sample_usage_field}}}}}</div>
-<div class="sample-english">{{{{{sample_usage_english_field}}}}}</div>
-{{{{Sample Usage (Audio)}}}}
-
-<hr>
-
-<div class="related-words">{{{{Related Words}}}}</div>
-"""
-
-            # Create the model
+            # Create the model with both Chinese front and English front templates
             self.client.send_request(
                 AnkiAction.CREATE_MODEL,
                 {
                     "modelName": model_name,
                     "inOrderFields": fields,
-                    "css": DEFAULT_CSS,
+                    "css": css,
                     "cardTemplates": [
                         {
-                            "Name": "Card 1",
-                            "Front": front_template,
-                            "Back": back_template,
-                        }
+                            "Name": "Chinese front",
+                            "Front": templates["Chinese front"]["Front"],
+                            "Back": templates["Chinese front"]["Back"],
+                        },
+                        {
+                            "Name": "English front",
+                            "Front": templates["English front"]["Front"],
+                            "Back": templates["English front"]["Back"],
+                        },
                     ],
                 },
+            )
+
+            print(
+                f"Created note type '{model_name}' with Chinese front and English front templates."
             )
 
             return model_name
@@ -535,72 +515,6 @@ class NoteTypeManager:
                 AnkiAction.CREATE_MODEL.value,
                 str(e),
             )
-
-
-# Default templates for Anki note types
-DEFAULT_CSS = """
-.card {
-    font-family: arial;
-    font-size: 20px;
-    text-align: center;
-    color: black;
-    background-color: white;
-}
-
-.chinese {
-    font-size: 40px;
-}
-
-.pronunciation {
-    font-size: 24px;
-    color: #7286D3;
-}
-
-.english {
-    font-size: 24px;
-    color: #555;
-}
-
-.sample {
-    font-size: 22px;
-    margin-top: 20px;
-    text-align: left;
-}
-
-.sample-english {
-    font-size: 18px;
-    color: #555;
-    text-align: left;
-}
-
-.related-words {
-    font-size: 18px;
-    margin-top: 20px;
-    text-align: left;
-}
-"""
-
-# These templates are now generated dynamically in ensure_note_type_exists
-# based on the language-specific field names
-DEFAULT_FRONT_TEMPLATE = """
-<div class="chinese">{{Word}}</div>
-"""
-
-DEFAULT_BACK_TEMPLATE = """
-<div class="chinese">{{Word}}</div>
-<div class="pronunciation">{{Pinyin}}</div>
-<div class="english">{{English}}</div>
-
-<hr>
-
-<div class="sample">{{Sample Usage}}</div>
-<div class="sample-english">{{Sample Usage (English)}}</div>
-{{Sample Usage (Audio)}}
-
-<hr>
-
-<div class="related-words">{{Related Words}}</div>
-"""
 
 
 def get_default_anki_media_dir() -> Path:

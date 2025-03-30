@@ -19,9 +19,14 @@ def update_card_styling_inner(model_name: str = "chinese-tutor") -> str:
     """
     client = AnkiConnectClient()
 
-    # Get the CSS and templates for the Chinese tutor cards
-    css = get_card_css()
-    templates = get_card_templates()
+    # Determine which language templates to use based on the model name
+    language = "mandarin"  # Default
+    if "cantonese" in model_name.lower():
+        language = "cantonese"
+
+    # Get the CSS and templates for the specified language
+    css = get_card_css(language)
+    templates = get_card_templates(language)
 
     # Update the card styling and templates
     client.update_card_styling_and_templates(
@@ -30,30 +35,47 @@ def update_card_styling_inner(model_name: str = "chinese-tutor") -> str:
     return f"Card styling updated successfully for model '{model_name}'."
 
 
-def get_card_css() -> str:
-    """Get the CSS for the card styling.
+def get_card_css(language: str = "mandarin") -> str:
+    """Get the CSS for the card styling based on language.
+
+    Args:
+        language: The language to get CSS for ("mandarin" or "cantonese").
 
     Returns:
         str: The CSS for the card styling.
     """
     base_dir = Path(__file__).parent.parent / "card_styling" / "css"
-    css_files = ["common.css", "chinese_front.css", "english_front.css"]
+
+    # Common CSS files for all languages
+    css_files = ["common.css", "english_front.css"]
+
+    # Add language-specific CSS file
+    if language.lower() == "mandarin":
+        css_files.append("mandarin_front.css")
+    elif language.lower() == "cantonese":
+        css_files.append("cantonese_front.css")
 
     combined_css = []
     for css_file in css_files:
-        with open(base_dir / css_file) as f:
-            combined_css.append(f.read())
+        try:
+            with open(base_dir / css_file) as f:
+                combined_css.append(f.read())
+        except FileNotFoundError:
+            print(f"Warning: CSS file {css_file} not found, skipping")
 
     return "\n\n".join(combined_css)
 
 
-def get_card_templates() -> dict:
-    """Get the templates for the card styling.
+def get_card_templates(language: str = "mandarin") -> dict:
+    """Get the templates for the card styling based on language.
+
+    Args:
+        language: The language to get templates for ("mandarin" or "cantonese").
 
     Returns:
         dict: The templates for the card styling.
     """
-    base_dir = Path(__file__).parent.parent / "card_styling" / "templates"
+    base_dir = Path(__file__).parent.parent / "card_styling" / "templates" / language
     templates = {}
 
     # Load Chinese front templates
