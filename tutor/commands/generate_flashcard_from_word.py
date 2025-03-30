@@ -109,7 +109,9 @@ def _generate_flashcard_from_word_impl(
 
         if maybe_add_flashcards_to_deck(flashcards, deck):
             # Use the actual word from the generated flashcard
-            new_word = flashcards.flashcards[0].word if flashcards.flashcards else word
+            new_word = (
+                flashcards[0].word if flashcards and len(flashcards) > 0 else word
+            )
             results.append(f"Added new flashcard for '{new_word}' in {language}")
         else:
             results.append(f"No new flashcard added for '{word}'")
