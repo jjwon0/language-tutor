@@ -1,3 +1,4 @@
+import click
 from typing import Optional
 from tutor.llm.models import ChineseFlashcard
 from tutor.utils.anki import AnkiConnectClient
@@ -7,21 +8,58 @@ from tutor.llm_flashcards import (
 from tutor.utils.logging import dprint
 from tutor.llm.prompts import get_generate_flashcard_from_word_prompt
 from tutor.utils.azure import text_to_speech
+from tutor.utils.config import get_config
 
 
-def fix_cards_inner(
+@click.command()
+@click.option("--deck", type=str, default=None, help="Deck to fix cards in")
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Show what would be updated without making changes",
+)
+@click.option(
+    "--limit",
+    type=int,
+    default=None,
+    help="Limit the number of cards to process",
+)
+@click.option(
+    "--force-update",
+    is_flag=True,
+    default=False,
+    help="Force update all cards even if they have all required fields",
+)
+def fix_cards(
+    deck: Optional[str],
+    dry_run: bool = False,
+    limit: Optional[int] = None,
+    force_update: bool = False,
+) -> None:
+    """Fix all cards in a deck by regenerating them with latest features.
+
+    Only regenerates audio if the sample usage changes.
+    """
+    # Use default deck from config if not specified
+    deck = deck or get_config().default_deck
+    result = _fix_cards_impl(deck, dry_run, limit, force_update)
+    click.echo(result)
+
+
+def _fix_cards_impl(
     deck: str,
     dry_run: bool = False,
     limit: Optional[int] = None,
     force_update: bool = False,
 ) -> str:
-    """Fix all cards in a deck by regenerating them with latest features.
-
-    Only regenerates audio if the sample usage changes.
+    """Implementation of fix_cards command.
 
     Args:
         deck: Name of the deck to fix cards in
         dry_run: If True, show what would be updated without making changes
+        limit: Maximum number of cards to process
+        force_update: Force update all cards even if they have all required fields
 
     Returns:
         A summary of what was updated

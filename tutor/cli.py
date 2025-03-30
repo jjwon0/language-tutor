@@ -18,6 +18,7 @@ from tutor.commands.list_lesser_known_cards import (
 )
 from tutor.commands.run_web import run_web
 from tutor.commands.setup_anki import setup_anki
+from tutor.commands.fix_cards import fix_cards
 from tutor.llm_flashcards import GPT_3_5_TURBO, GPT_4, GPT_4o
 from tutor.utils.config import get_config
 
@@ -144,39 +145,6 @@ def list_lesser_known_cards(deck: str, count: int):
 
 
 @cli.command()
-@click.option("--deck", type=str, default=None, help="Deck to fix cards in")
-@click.option(
-    "--dry-run",
-    is_flag=True,
-    default=False,
-    help="Show what would be updated without making changes",
-)
-@click.option(
-    "--limit",
-    type=int,
-    default=None,
-    help="Limit the number of cards to process",
-)
-@click.option(
-    "--force-update",
-    is_flag=True,
-    default=False,
-    help="Force update all cards even if they have all required fields",
-)
-def fix_cards(
-    deck: Optional[str], dry_run: bool, limit: Optional[int], force_update: bool
-) -> None:
-    """Fix all cards in a deck by regenerating them with latest features.
-
-    Only regenerates audio if the sample usage changes.
-    """
-    from tutor.commands.fix_cards import fix_cards_inner
-
-    deck = deck or get_config().default_deck
-    click.echo(fix_cards_inner(deck, dry_run, limit, force_update))
-
-
-@cli.command()
 @click.argument("deck", required=False)
 def config(deck: Optional[str]) -> None:
     """View or set the default deck configuration.
@@ -197,8 +165,7 @@ def config(deck: Optional[str]) -> None:
             exit(1)
 
 
-# Add web interface command
+# Add commands
 cli.add_command(run_web, name="web")
-
-# Add setup-anki command
 cli.add_command(setup_anki, name="setup-anki")
+cli.add_command(fix_cards, name="fix-cards")
