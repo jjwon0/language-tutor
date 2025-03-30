@@ -1,3 +1,5 @@
+from tutor.utils.config import get_config
+
 _LANGUAGE_DESCRIPTIONS = {
     "mandarin": "Mandarin Chinese",
     "cantonese": "Cantonese Chinese",
@@ -15,9 +17,10 @@ def _get_flashcard_description(language: str) -> str:
     """
     language_name = _LANGUAGE_DESCRIPTIONS.get(language.lower(), "Mandarin Chinese")
     pronunciation_field = "pinyin" if language.lower() == "mandarin" else "jyutping"
+    learner_level = get_config().learner_level
 
     return f"""
-Generate a {language_name} flashcard that helps intermediate students understand:
+Generate a {language_name} flashcard that helps {learner_level} students understand:
 1. The word's meaning and usage context
 2. How it's naturally used in sentences
 3. Its relationship to other commonly paired words or words with similar patterns

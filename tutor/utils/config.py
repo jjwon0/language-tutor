@@ -65,6 +65,25 @@ class Config:
         self._config["default_language"] = value.lower()
         self.save_config(self._config)
 
+    @property
+    def learner_level(self) -> str:
+        """Get the learner level for flashcards.
+
+        Returns:
+            str: The learner level (e.g., "beginner", "intermediate", "advanced"). Defaults to "intermediate".
+        """
+        return self._config.get("learner_level", "intermediate")
+
+    @learner_level.setter
+    def learner_level(self, value: str) -> None:
+        """Set the learner level for flashcards.
+
+        Args:
+            value: The learner level (e.g., "beginner", "intermediate", "advanced").
+        """
+        self._config["learner_level"] = value.lower()
+        self.save_config(self._config)
+
 
 # Singleton instance
 _config: Optional[Config] = None

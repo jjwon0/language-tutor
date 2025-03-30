@@ -46,7 +46,7 @@ class LanguageFlashcard(BaseModel):
         description="The word translated into English (lowercased). Include any important context or nuance in parentheses to help distinguish from similar words."
     )
     sample_usage: str = Field(
-        description="A practical example sentence that shows how the word is naturally used in context. Should be at an intermediate level."
+        description="A practical example sentence that shows how the word is naturally used in context. Should be appropriate for the configured learner level."
     )
     sample_usage_english: str = Field(
         description="Natural English translation of the sample usage sentence"
