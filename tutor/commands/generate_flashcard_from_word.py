@@ -10,8 +10,8 @@ from tutor.llm_flashcards import (
 )
 from tutor.llm.prompts import get_generate_flashcard_from_word_prompt
 from tutor.utils.logging import dprint
-from tutor.utils.chinese import to_simplified
 from tutor.utils.config import get_config
+from tutor.language_processing import LanguagePreprocessor
 
 
 def read_words_from_stdin() -> List[str]:
@@ -87,8 +87,8 @@ def _generate_flashcard_from_word_impl(
     results = []
 
     for i, word in enumerate(words, 1):
-        # Convert traditional characters to simplified
-        word = to_simplified(word)
+        # Process word based on language (simplified for Mandarin, traditional for Cantonese)
+        word = LanguagePreprocessor.process_for_language(word, language)
 
         if total > 1:
             results.append(f"\nProcessing word {i}/{total}: {word}")
