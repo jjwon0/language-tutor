@@ -23,26 +23,30 @@ def generate_flashcard_from_word_inner(deck: str, words: tuple[str, ...]) -> Non
 
     for i, word in enumerate(words, 1):
         # Convert traditional characters to simplified
-        simplified_word = to_simplified(word)
+        word = to_simplified(word)
 
         if total > 1:
-            print(f"\nProcessing word {i}/{total}: {simplified_word}")
+            print(f"\nProcessing word {i}/{total}: {word}")
 
         # Check if card already exists
-        existing_cards = ankiconnect_client.find_notes(
-            get_word_exists_query(simplified_word)
-        )
+        existing_cards = ankiconnect_client.find_notes(get_word_exists_query(word))
         if existing_cards:
-            print(f"Card for '{simplified_word}' exists already:\n{existing_cards[0]}")
+            print(f"Card for '{word}' exists already:\n{existing_cards[0]}")
             continue
 
         # Generate new card content
-        prompt = get_generate_flashcard_from_word_prompt(simplified_word)
+        prompt = get_generate_flashcard_from_word_prompt(word)
         dprint(prompt)
         flashcards = generate_flashcards(prompt)
         dprint(flashcards)
 
         if maybe_add_flashcards_to_deck(flashcards, deck):
-            print(f"Added new flashcard for '{simplified_word}'")
+            # Use the actual word from the generated flashcard
+            new_word = (
+                flashcards.flashcards[0].word
+                if flashcards and flashcards.flashcards
+                else word
+            )
+            print(f"Added new flashcard for '{new_word}'")
         else:
-            print(f"No new flashcard added for '{simplified_word}'")
+            print(f"No new flashcard added for '{word}'")
