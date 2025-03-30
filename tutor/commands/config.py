@@ -4,21 +4,25 @@ from tutor.utils.config import get_config
 
 
 @click.command()
-@click.argument("deck", required=False)
+@click.option("--deck", "-d", help="Set the default deck for flashcards")
 @click.option(
     "--language", "-l", help="Set the default language (mandarin or cantonese)"
 )
 @click.option(
     "--learner-level",
+    "--level",
+    "-v",
     help="Set the learner level (e.g., beginner, intermediate, advanced)",
 )
 def config(deck: str = None, language: str = None, learner_level: str = None) -> None:
     """View or set configuration options.
 
-    If DECK is provided, sets the default deck.
-    If --language is provided, sets the default language.
-    If --learner-level is provided, sets the learner level.
-    If no arguments are provided, shows current configuration.
+    Use options to specify what to configure:
+    --deck: Set the default deck for flashcards
+    --language: Set the default language (mandarin or cantonese)
+    --learner-level: Set the learner level (beginner, intermediate, advanced, etc.)
+
+    If no options are provided, shows current configuration.
     """
     config_obj = get_config()
     changes_made = False

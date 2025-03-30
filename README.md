@@ -42,13 +42,16 @@ A CLI tool to help generate and manage Chinese language flashcards in Anki.
    ./ct config
 
    # Set default deck
-   ./ct config "Your::Deck::Name"
+   ./ct config --deck "Your::Deck::Name"
 
    # Set default language
    ./ct config --language "mandarin"
 
    # Set learner level (affects difficulty of generated content)
    ./ct config --learner-level "intermediate"
+
+   # Set multiple options at once
+   ./ct config --deck "Your::Deck::Name" --language "cantonese" --learner-level "beginner"
    ```
 
 4. **OpenAI Setup**
