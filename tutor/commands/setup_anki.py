@@ -15,11 +15,15 @@ from tutor.utils.anki import AnkiConnectClient, AnkiAction, AnkiConnectError
 def setup_anki(languages: str):
     """Set up Anki note types for Chinese Tutor.
 
-    This command creates the required note types in Anki for the specified languages.
-    By default, it creates note types for both Mandarin and Cantonese.
+    This command creates the required note types in Anki for the specified languages
+    and updates existing note types with the latest templates and styling.
+    By default, it processes both Mandarin and Cantonese.
     """
     # Parse languages
     language_list = [lang.strip().lower() for lang in languages.split(",")]
+
+    # Print header
+    click.secho("=== Chinese Tutor - Anki Setup ===\n", fg="green", bold=True)
 
     # Create Anki client
     client = AnkiConnectClient()
@@ -28,21 +32,32 @@ def setup_anki(languages: str):
     # Check connection to Anki
     try:
         client.list_decks()
-        print("Connected to Anki successfully.")
+        click.secho("✓ Connected to Anki successfully.\n", fg="green")
     except Exception as e:
-        print(f"Error connecting to Anki: {e}")
-        print("Please make sure Anki is running with the AnkiConnect add-on installed.")
+        click.secho("✗ Error connecting to Anki:", fg="red", bold=True)
+        click.echo(f"  {e}")
+        click.echo(
+            "  Please make sure Anki is running with the AnkiConnect add-on installed."
+        )
         return
 
-    # Create note types for each language
+    # Track success/failure for each language
+    success_count = 0
+    failure_count = 0
+
+    # Process note types for each language
     for language in language_list:
+        click.secho(f"Processing {language.capitalize()} note type:", bold=True)
+
         if language not in ["mandarin", "cantonese"]:
-            print(f"Unsupported language: {language}. Skipping.")
+            click.secho(f"  ✗ Unsupported language: {language}. Skipping.", fg="yellow")
+            failure_count += 1
             continue
 
         try:
             # Check if note type already exists
             model_name = f"chinese-tutor-{language}"
+            click.echo(f"  Checking if note type '{model_name}' exists...")
             models = client.send_request(AnkiAction.MODEL_NAMES, {})
 
             if model_name in models:
@@ -66,36 +81,38 @@ def setup_anki(languages: str):
                     ]
 
                     if not missing_fields:
-                        print(
-                            f"Note type '{model_name}' already exists with all required fields."
+                        click.secho(
+                            f"  ✓ Note type '{model_name}' already exists with all required fields.",
+                            fg="green",
                         )
-                        print(f"Updating templates and styling for '{model_name}'...")
+                        click.echo("  Updating templates and styling...")
                         # Update the styling and templates
                         css = get_card_css(language)
                         templates = get_card_templates(language)
                         client.update_card_styling_and_templates(
                             model_name=model_name, css=css, templates=templates
                         )
-                        print(
-                            f"Templates and styling updated successfully for '{model_name}'."
+                        click.secho(
+                            "  ✓ Templates and styling updated successfully.\n",
+                            fg="green",
                         )
+                        success_count += 1
                         continue
                     else:
-                        print(
-                            f"Note type '{model_name}' exists but is missing fields: {', '.join(missing_fields)}"
+                        click.secho(
+                            f"  ✗ Note type '{model_name}' exists but is missing fields:",
+                            fg="red",
                         )
-                        print(
-                            f"Cannot update note type '{model_name}' as it's missing required fields."
+                        click.echo(f"    {', '.join(missing_fields)}")
+                        click.echo("  Cannot update as it's missing required fields.")
+                        click.echo(
+                            "  Please manually recreate this note type or fix the missing fields.\n"
                         )
-                        print(
-                            "Please manually recreate this note type or fix the missing fields."
-                        )
+                        failure_count += 1
                         continue
                 except Exception as e:
-                    print(f"Error checking fields for note type '{model_name}': {e}")
-                    print(
-                        f"Attempting to update templates and styling for '{model_name}'..."
-                    )
+                    click.secho(f"  ✗ Error checking fields: {e}", fg="red")
+                    click.echo("  Attempting to update templates and styling anyway...")
                     try:
                         # Try to update the styling and templates anyway
                         css = get_card_css(language)
@@ -103,22 +120,58 @@ def setup_anki(languages: str):
                         client.update_card_styling_and_templates(
                             model_name=model_name, css=css, templates=templates
                         )
-                        print(
-                            f"Templates and styling updated successfully for '{model_name}'."
+                        click.secho(
+                            "  ✓ Templates and styling updated successfully.\n",
+                            fg="green",
                         )
+                        success_count += 1
                     except Exception as update_error:
-                        print(
-                            f"Error updating templates for '{model_name}': {update_error}"
+                        click.secho(
+                            f"  ✗ Error updating templates: {update_error}\n", fg="red"
                         )
+                        failure_count += 1
                     continue
 
             # Create note type with templates and CSS
+            click.echo(f"  Creating new note type '{model_name}'...")
             note_type_manager.create_note_type(language)
-            print(f"Created note type '{model_name}' successfully.")
+            click.secho(
+                f"  ✓ Created note type '{model_name}' successfully.\n", fg="green"
+            )
+            success_count += 1
         except Exception as e:
-            print(f"Error creating note type for {language}: {e}")
+            click.secho(f"  ✗ Error creating note type: {e}\n", fg="red")
+            failure_count += 1
 
-    print("\nSetup complete. You can now use Chinese Tutor to create flashcards.")
+    # Print summary based on success/failure
+    click.secho("=== Setup Summary ===", fg="blue", bold=True)
+    if success_count > 0:
+        click.secho(
+            f"✓ Successfully processed {success_count} note type(s)", fg="green"
+        )
+    if failure_count > 0:
+        click.secho(f"✗ Failed to process {failure_count} note type(s)", fg="red")
+
+    if success_count > 0 and failure_count == 0:
+        click.secho(
+            "\n✓ Setup complete! You can now use Chinese Tutor to create flashcards.",
+            fg="green",
+            bold=True,
+        )
+    elif success_count > 0:
+        click.secho(
+            "\n⚠ Setup partially complete. Some note types were processed successfully.",
+            fg="yellow",
+        )
+        click.echo(
+            "You can use Chinese Tutor with the successfully processed languages."
+        )
+    else:
+        click.secho(
+            "\n✗ Setup failed. Please fix the errors and try again.",
+            fg="red",
+            bold=True,
+        )
 
 
 def get_card_css(language: str = "mandarin") -> str:
