@@ -67,7 +67,17 @@ def setup_anki(languages: str):
 
                     if not missing_fields:
                         print(
-                            f"Note type '{model_name}' already exists with all required fields. Skipping."
+                            f"Note type '{model_name}' already exists with all required fields."
+                        )
+                        print(f"Updating templates and styling for '{model_name}'...")
+                        # Update the styling and templates
+                        css = get_card_css(language)
+                        templates = get_card_templates(language)
+                        client.update_card_styling_and_templates(
+                            model_name=model_name, css=css, templates=templates
+                        )
+                        print(
+                            f"Templates and styling updated successfully for '{model_name}'."
                         )
                         continue
                     else:
@@ -75,20 +85,31 @@ def setup_anki(languages: str):
                             f"Note type '{model_name}' exists but is missing fields: {', '.join(missing_fields)}"
                         )
                         print(
-                            f"Note type '{model_name}' needs to be updated but we won't delete it as it might have associated notes."
+                            f"Cannot update note type '{model_name}' as it's missing required fields."
                         )
                         print(
-                            "Please use the update-card-styling command to update the templates."
+                            "Please manually recreate this note type or fix the missing fields."
                         )
                         continue
                 except Exception as e:
                     print(f"Error checking fields for note type '{model_name}': {e}")
                     print(
-                        f"Note type '{model_name}' might need to be updated but we won't delete it as it might have associated notes."
+                        f"Attempting to update templates and styling for '{model_name}'..."
                     )
-                    print(
-                        "Please use the update-card-styling command to update the templates."
-                    )
+                    try:
+                        # Try to update the styling and templates anyway
+                        css = get_card_css(language)
+                        templates = get_card_templates(language)
+                        client.update_card_styling_and_templates(
+                            model_name=model_name, css=css, templates=templates
+                        )
+                        print(
+                            f"Templates and styling updated successfully for '{model_name}'."
+                        )
+                    except Exception as update_error:
+                        print(
+                            f"Error updating templates for '{model_name}': {update_error}"
+                        )
                     continue
 
             # Create note type with templates and CSS

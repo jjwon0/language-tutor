@@ -177,20 +177,6 @@ def fix_cards(
 
 
 @cli.command()
-@click.option(
-    "--model",
-    "-m",
-    default="chinese-tutor",
-    help="The name of the Anki model to update. Defaults to 'chinese-tutor'.",
-)
-def update_card_styling(model: str) -> None:
-    """Update the styling of Anki cards without changing their content."""
-    from tutor.commands.update_card_styling import update_card_styling_inner
-
-    click.echo(update_card_styling_inner(model_name=model))
-
-
-@cli.command()
 @click.argument("deck", required=False)
 def config(deck: Optional[str]) -> None:
     """View or set the default deck configuration.
