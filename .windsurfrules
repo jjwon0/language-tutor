@@ -1,0 +1,13 @@
+# Windsurf Rules for chinese-tutor project
+
+Always activate the chinese-tutor pyenv virtualenv before running any commands
+
+To activate the virtualenv, run:
+  pyenv activate chinese-tutor
+
+This ensures that all dependencies are available and commands run in the correct environment.
+If you haven't created this virtualenv yet, you can do so with:
+  pyenv virtualenv 3.x.x chinese-tutor
+  pyenv local chinese-tutor
+
+Where 3.x.x is your preferred Python version.
