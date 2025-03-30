@@ -1,15 +1,12 @@
 import click
-import sys
-from typing import Optional, List
+from typing import Optional
 from dotenv import load_dotenv
 
 from tutor.commands.generate_topics import (
     generate_topics_prompt,
     select_conversation_topic,
 )
-from tutor.commands.generate_flashcard_from_word import (
-    generate_flashcard_from_word_inner,
-)
+from tutor.commands.generate_flashcard_from_word import generate_flashcard_from_word
 from tutor.commands.regenerate_flashcard import regenerate_flashcard
 from tutor.commands.list_lesser_known_cards import list_lesser_known_cards
 from tutor.commands.run_web import run_web
@@ -41,52 +38,8 @@ def cli(model: str, debug: bool, skip_confirm: bool) -> None:
     set_skip_confirm(skip_confirm)
 
 
-def read_words_from_stdin() -> List[str]:
-    """Read words from stdin, handling both piped input and interactive input."""
-    if sys.stdin.isatty():
-        # No piped input, return empty list
-        return []
-
-    # Read from stdin and split on whitespace/newlines
-    content = sys.stdin.read().strip()
-    return [word for word in content.split() if word]
-
-
-@cli.command()
-@click.argument("words", type=str, nargs=-1)
-@click.option("--deck", type=str, default=None)
-@click.option(
-    "--language",
-    type=click.Choice(["mandarin", "cantonese"]),
-    default=None,
-    help="Language for the flashcard (defaults to config setting)",
-)
-def generate_flashcard_from_word(deck: str, language: str, words: tuple[str, ...]):
-    """Add new Anki flashcards for one or more WORDS to DECK.
-
-    Examples:
-        ct g 你好                           # Single word (using default language)
-        ct g --language cantonese 你好       # Single word in Cantonese
-        ct g 你好 再见 谢谢                 # Multiple space-separated words
-        echo "你好\n再见" | ct g             # Read from stdin (newline-separated)
-    """
-    # Combine words from arguments and stdin
-    all_words = list(words)
-    stdin_words = read_words_from_stdin()
-    if stdin_words:
-        all_words.extend(stdin_words)
-
-    if not all_words:
-        print("Please provide at least one word")
-        return
-
-    # Use provided values or defaults from config
-    deck = deck or get_config().default_deck
-    language = language or get_config().default_language
-    click.echo(generate_flashcard_from_word_inner(deck, tuple(all_words), language))
-
-
-# Shortcut for the most common action.
+# Add generate_flashcard_from_word command and shortcut
+cli.add_command(generate_flashcard_from_word, name="generate-flashcard-from-word")
 cli.add_command(generate_flashcard_from_word, name="g")
 
 

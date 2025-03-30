@@ -1,3 +1,7 @@
+import click
+import sys
+from typing import List, Optional, Tuple
+
 from tutor.utils.anki import AnkiConnectClient
 from tutor.llm_flashcards import (
     generate_flashcards,
@@ -7,12 +11,62 @@ from tutor.llm_flashcards import (
 from tutor.llm.prompts import get_generate_flashcard_from_word_prompt
 from tutor.utils.logging import dprint
 from tutor.utils.chinese import to_simplified
+from tutor.utils.config import get_config
 
 
-def generate_flashcard_from_word_inner(
-    deck: str, words: tuple[str, ...], language: str = "mandarin"
+def read_words_from_stdin() -> List[str]:
+    """Read words from stdin, handling both piped input and interactive input."""
+    if sys.stdin.isatty():
+        # No piped input, return empty list
+        return []
+
+    # Read from stdin and split on whitespace/newlines
+    content = sys.stdin.read().strip()
+    return [word for word in content.split() if word]
+
+
+@click.command()
+@click.argument("words", type=str, nargs=-1)
+@click.option("--deck", type=str, default=None)
+@click.option(
+    "--language",
+    type=click.Choice(["mandarin", "cantonese"]),
+    default=None,
+    help="Language for the flashcard (defaults to config setting)",
+)
+def generate_flashcard_from_word(
+    deck: Optional[str], language: Optional[str], words: Tuple[str, ...]
 ) -> None:
-    """Generate flashcards for one or more words.
+    """Add new Anki flashcards for one or more WORDS to DECK.
+
+    Examples:
+        ct g 你好                           # Single word (using default language)
+        ct g --language cantonese 你好       # Single word in Cantonese
+        ct g 你好 再见 谢谢                 # Multiple space-separated words
+        echo "你好\n再见" | ct g             # Read from stdin (newline-separated)
+    """
+    # Combine words from arguments and stdin
+    all_words = list(words)
+    stdin_words = read_words_from_stdin()
+    if stdin_words:
+        all_words.extend(stdin_words)
+
+    if not all_words:
+        click.echo("Please provide at least one word")
+        return
+
+    # Use provided values or defaults from config
+    deck_name = deck or get_config().default_deck
+    lang = language or get_config().default_language
+
+    result = _generate_flashcard_from_word_impl(deck_name, tuple(all_words), lang)
+    click.echo(result)
+
+
+def _generate_flashcard_from_word_impl(
+    deck: str, words: tuple[str, ...], language: str = "mandarin"
+) -> str:
+    """Implementation of generate_flashcard_from_word command.
 
     For each word:
     1. Convert traditional characters to simplified (if any)
@@ -24,23 +78,27 @@ def generate_flashcard_from_word_inner(
         deck: The Anki deck to add flashcards to
         words: The words to generate flashcards for
         language: The language to generate flashcards for ("mandarin" or "cantonese")
+
+    Returns:
+        A summary of the operation results
     """
     ankiconnect_client = AnkiConnectClient()
     total = len(words)
+    results = []
 
     for i, word in enumerate(words, 1):
         # Convert traditional characters to simplified
         word = to_simplified(word)
 
         if total > 1:
-            print(f"\nProcessing word {i}/{total}: {word}")
+            results.append(f"\nProcessing word {i}/{total}: {word}")
 
         # Check if card already exists
         existing_cards = ankiconnect_client.find_notes(
             get_word_exists_query(word, language)
         )
         if existing_cards:
-            print(f"Card for '{word}' exists already:\n{existing_cards[0]}")
+            results.append(f"Card for '{word}' exists already:\n{existing_cards[0]}")
             continue
 
         # Generate new card content
@@ -51,7 +109,9 @@ def generate_flashcard_from_word_inner(
 
         if maybe_add_flashcards_to_deck(flashcards, deck):
             # Use the actual word from the generated flashcard
-            new_word = flashcards[0].word if flashcards else word
-            print(f"Added new flashcard for '{new_word}' in {language}")
+            new_word = flashcards.flashcards[0].word if flashcards.flashcards else word
+            results.append(f"Added new flashcard for '{new_word}' in {language}")
         else:
-            print(f"No new flashcard added for '{word}'")
+            results.append(f"No new flashcard added for '{word}'")
+
+    return "\n".join(results)
