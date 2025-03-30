@@ -4,8 +4,8 @@ from typing import Optional, List
 from dotenv import load_dotenv
 
 from tutor.commands.generate_topics import (
-    generate_topics_prompt_inner,
-    select_conversation_topic_inner,
+    generate_topics_prompt,
+    select_conversation_topic,
 )
 from tutor.commands.generate_flashcard_from_word import (
     generate_flashcard_from_word_inner,
@@ -41,36 +41,6 @@ def cli(model: str, debug: bool, skip_confirm: bool) -> None:
     set_model(model)
     set_debug(debug)
     set_skip_confirm(skip_confirm)
-
-
-@cli.command()
-@click.option(
-    "--conversation-topics-path",
-    type=str,
-    help="Path to data file with past topics",
-    default="data/conversation_topics.yaml",
-)
-@click.option(
-    "--num-topics",
-    type=int,
-    help="Number of new topics to generate",
-    default=10,
-)
-def generate_topics_prompt(conversation_topics_path: str, num_topics: int) -> None:
-    """Prints a prompt to pass to ChatGPT to get new conversation topics."""
-    click.echo(generate_topics_prompt_inner(conversation_topics_path, num_topics))
-
-
-@cli.command()
-@click.option(
-    "--conversation-topics-path",
-    type=str,
-    help="Path to data file with past topics",
-    default="data/conversation_topics.yaml",
-)
-def select_conversation_topic(conversation_topics_path: str):
-    """Selects a random conversation topic from a file on disk."""
-    click.echo(select_conversation_topic_inner(conversation_topics_path))
 
 
 def read_words_from_stdin() -> List[str]:
@@ -159,3 +129,5 @@ cli.add_command(run_web, name="web")
 cli.add_command(setup_anki, name="setup-anki")
 cli.add_command(fix_cards, name="fix-cards")
 cli.add_command(list_lesser_known_cards, name="list-lesser-known-cards")
+cli.add_command(generate_topics_prompt, name="generate-topics-prompt")
+cli.add_command(select_conversation_topic, name="select-conversation-topic")
