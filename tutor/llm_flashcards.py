@@ -1,4 +1,5 @@
 from openai import OpenAI
+import click
 from typing import List, Type
 from tutor.utils.logging import dprint
 from tutor.utils.anki import AnkiConnectClient, get_subdeck
@@ -116,13 +117,11 @@ def maybe_add_flashcards_to_deck(
 
     try:
         for f in flashcards:
-            dprint(f"{f.word}")
-            # Print the flashcard details
             print(f)
 
             if not get_skip_confirm():
                 try:
-                    if not input("Add this to deck (y/n)? ").lower().strip() == "y":
+                    if not click.confirm("Add this to deck?", err=True, default=True):
                         dprint(" - skipped")
                         continue
                 except (KeyboardInterrupt, EOFError):
@@ -134,13 +133,15 @@ def maybe_add_flashcards_to_deck(
                 note_id = ankiconnect_client.add_flashcard(deck, f, audio_filepath)
                 dprint(f" - added with note ID: {note_id}!")
                 num_added += 1
-                print(f"Added {num_added} new card(s)!")
+                click.secho(f"Added {num_added} new card(s)!", fg="green")
             except Exception as e:
-                print(f"Error adding flashcard for '{f.word}': {str(e)}")
+                click.secho(
+                    f"Error adding flashcard for '{f.word}': {str(e)}", fg="red"
+                )
                 continue
 
     except KeyboardInterrupt:
-        print("\nAborted by user")
+        click.secho("\nAborted by user", fg="yellow", bold=True)
         return False
     finally:
         return num_added > 0

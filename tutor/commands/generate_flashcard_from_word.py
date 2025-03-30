@@ -86,14 +86,15 @@ def _generate_flashcard_from_word_impl(
         word = LanguagePreprocessor.process_for_language(word, language)
 
         if total > 1:
-            click.echo(f"\nProcessing word {i}/{total}: {word}")
+            click.secho(f"\nProcessing word {i}/{total}: {word}", fg="blue")
 
         # Check if card already exists
         existing_cards = ankiconnect_client.find_notes(
             get_word_exists_query(word, language)
         )
         if existing_cards:
-            click.echo(f"Card for '{word}' exists already:\n{existing_cards[0]}")
+            click.secho(f"Card for '{word}' exists already:", fg="yellow")
+            click.echo(f"{existing_cards[0]}")
             continue
 
         # Generate new card content
@@ -103,4 +104,4 @@ def _generate_flashcard_from_word_impl(
         dprint(flashcards)
 
         if not maybe_add_flashcards_to_deck(flashcards, deck):
-            click.echo(f"No new flashcard added for '{word}'")
+            click.secho(f"No new flashcard added for '{word}'", fg="red")
