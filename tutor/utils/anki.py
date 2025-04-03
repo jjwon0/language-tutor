@@ -118,13 +118,20 @@ class AnkiConnectClient:
                 e.response,
             )
 
-    def add_flashcard(self, deck_name, flashcard: LanguageFlashcard, audio_filepath):
+    def add_flashcard(
+        self,
+        deck_name,
+        flashcard: LanguageFlashcard,
+        sample_usage_audio_filepath=None,
+        word_audio_filepath=None,
+    ):
         """Add a new flashcard and return its note ID.
 
         Args:
             deck_name: The name of the deck to add the flashcard to
             flashcard: The flashcard to add (MandarinFlashcard or CantoneseFlashcard)
-            audio_filepath: Path to the audio file for the sample usage
+            sample_usage_audio_filepath: Path to the audio file for the sample usage
+            word_audio_filepath: Path to the audio file for the word itself
 
         Returns:
             The note ID of the added flashcard
@@ -160,22 +167,37 @@ class AnkiConnectClient:
 
                 fields["Related Words"] = "\n".join(related_words_text)
 
-            # Make sure the deck exists
-            self.maybe_add_deck(deck_name)
-
             note = {
                 "deckName": deck_name,
                 "modelName": model_name,
                 "fields": fields,
                 "tags": [],
-                "audio": [
+            }
+
+            # Add audio attachments if provided
+            audio_attachments = []
+
+            if sample_usage_audio_filepath:
+                audio_attachments.append(
                     {
-                        "path": audio_filepath,
-                        "filename": audio_filepath,
+                        "path": sample_usage_audio_filepath,
+                        "filename": sample_usage_audio_filepath,
                         "fields": ["Sample Usage (Audio)"],
                     }
-                ],
-            }
+                )
+
+            if word_audio_filepath:
+                audio_attachments.append(
+                    {
+                        "path": word_audio_filepath,
+                        "filename": word_audio_filepath,
+                        "fields": ["Word (Audio)"],
+                    }
+                )
+
+            if audio_attachments:
+                note["audio"] = audio_attachments
+
             note_id = self.send_request(AnkiAction.ADD_NOTE, {"note": note})
             if not note_id:
                 raise AnkiConnectError(
@@ -185,7 +207,7 @@ class AnkiConnectClient:
             return note_id
         except AnkiConnectError as e:
             raise AnkiConnectError(
-                f"Failed to add flashcard for '{flashcard.word}'", e.action, e.response
+                f"Failed to add flashcard for '{flashcard.word}':", e.action, e.response
             )
 
     def update_model_styling(self, model_name: str, css: str) -> None:

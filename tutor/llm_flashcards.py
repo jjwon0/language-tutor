@@ -129,8 +129,17 @@ def maybe_add_flashcards_to_deck(
                     return False
 
             try:
-                audio_filepath = text_to_speech(f.sample_usage)
-                note_id = ankiconnect_client.add_flashcard(deck, f, audio_filepath)
+                # Generate audio for both the word and sample usage
+                sample_usage_audio_filepath = text_to_speech(f.sample_usage)
+                word_audio_filepath = text_to_speech(f.word)
+
+                # Add the flashcard with both audio files
+                note_id = ankiconnect_client.add_flashcard(
+                    deck,
+                    f,
+                    sample_usage_audio_filepath=sample_usage_audio_filepath,
+                    word_audio_filepath=word_audio_filepath,
+                )
                 dprint(f" - added with note ID: {note_id}!")
                 num_added += 1
                 click.secho(f"Added {num_added} new card(s)!", fg="green")

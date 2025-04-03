@@ -163,6 +163,7 @@ class LanguageFlashcard(BaseModel):
             and field in cls.ANKI_FIELD_NAMES
         ]
         fields.append("Sample Usage (Audio)")
+        fields.append("Word (Audio)")
         return fields
 
     def __str__(self):
