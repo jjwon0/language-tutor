@@ -33,9 +33,9 @@ This ensures that all code is formatted and linted correctly before it is commit
 To check and fix code, run:
   pre-commit run --all-files
 
-## Write commits with a Conventional Commit message
+## Write commit messages in a Conventional Commit format
 
-When you are ready to commit, use a Conventional Commit message.
+Once a feature is completed, prepare a commit message in a Conventional Commit format and share it with the user.
 
 A Conventional Commit message has the following format:
 
