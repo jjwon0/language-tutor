@@ -213,14 +213,6 @@ class MandarinFlashcard(LanguageFlashcard):
     )
 
     @classmethod
-    def get_required_anki_fields(cls) -> List[str]:
-        """Get list of required Anki note fields, including backward compatibility fields."""
-        fields = super().get_required_anki_fields()
-        # Add backward compatibility fields
-        fields.extend(["Chinese", "Pinyin"])
-        return fields
-
-    @classmethod
     def _from_anki_json(cls, anki_json: Dict[str, Any]):
         """Create a Mandarin flashcard from Anki note JSON."""
         fields = anki_json["fields"]
