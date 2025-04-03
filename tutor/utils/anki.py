@@ -334,14 +334,16 @@ class AnkiConnectClient:
         self,
         note_id: int,
         flashcard: LanguageFlashcard,
-        audio_filepath: Optional[str] = None,
+        sample_usage_audio_filepath: Optional[str] = None,
+        word_audio_filepath: Optional[str] = None,
     ) -> None:
         """Update an existing flashcard.
 
         Args:
             note_id: The ID of the note to update
             flashcard: The updated flashcard data
-            audio_filepath: Optional path to the audio file for the sample usage
+            sample_usage_audio_filepath: Optional path to the audio file for the sample usage
+            word_audio_filepath: Optional path to the audio file for the word itself
         """
         try:
             # Prepare fields based on the flashcard's ANKI_FIELD_NAMES mapping
@@ -375,19 +377,39 @@ class AnkiConnectClient:
                 }
             }
 
-            if audio_filepath:
-                # Clear the audio field first
-                payload["note"]["fields"]["Sample Usage (Audio)"] = ""
+            # Handle audio updates if provided
+            audio_attachments = []
+            fields_to_clear = []
+
+            if sample_usage_audio_filepath:
+                fields_to_clear.append("Sample Usage (Audio)")
+                audio_attachments.append(
+                    {
+                        "path": sample_usage_audio_filepath,
+                        "filename": sample_usage_audio_filepath,
+                        "fields": ["Sample Usage (Audio)"],
+                    }
+                )
+
+            if word_audio_filepath:
+                fields_to_clear.append("Word (Audio)")
+                audio_attachments.append(
+                    {
+                        "path": word_audio_filepath,
+                        "filename": word_audio_filepath,
+                        "fields": ["Word (Audio)"],
+                    }
+                )
+
+            # If we have audio to update, first clear the fields
+            if fields_to_clear:
+                for field in fields_to_clear:
+                    payload["note"]["fields"][field] = ""
                 self.send_request(AnkiAction.UPDATE_NOTE_FIELDS, payload)
 
                 # Then update with new audio
-                payload["note"]["audio"] = [
-                    {
-                        "path": audio_filepath,
-                        "filename": audio_filepath,
-                        "fields": ["Sample Usage (Audio)"],
-                    }
-                ]
+                if audio_attachments:
+                    payload["note"]["audio"] = audio_attachments
 
             self.send_request(AnkiAction.UPDATE_NOTE_FIELDS, payload)
         except AnkiConnectError as e:

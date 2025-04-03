@@ -94,61 +94,103 @@ def _fix_cards_impl(
         try:
             print(f"\nProcessing card {i}/{len(cards)}: {card.word}")
 
-            # Check if card needs updates
-            needs_update = False
+            # Check if card needs content updates
+            needs_content_update = False
+            needs_audio_only = False
             reasons = []
             fields = ankiconnect_client.get_note_fields(card.anki_note_id)
 
-            # Check if any required fields are missing or empty
-            for field in ChineseFlashcard.get_required_anki_fields():
+            # Get content and audio fields using the new methods
+            content_fields = ChineseFlashcard.get_content_fields()
+            audio_fields = ChineseFlashcard.get_audio_fields()
+
+            # Check content fields
+            for field in content_fields:
                 if field not in fields or not fields[field]:
-                    needs_update = True
+                    needs_content_update = True
+                    reasons.append(f"missing {field}")
+
+            # Check audio fields separately
+            for field in audio_fields:
+                if field not in fields or not fields[field]:
+                    needs_audio_only = True
                     reasons.append(f"missing {field}")
 
             # Force update if requested
             if force_update:
-                needs_update = True
+                needs_content_update = True
                 reasons.append("force update requested")
 
-            if not needs_update:
+            # Skip if both content and audio are up to date
+            if not needs_content_update and not needs_audio_only:
                 print("Card is up to date, skipping...")
                 stats["skipped"] += 1
                 continue
 
             print(f"Updates needed: {', '.join(reasons)}")
 
-            # Generate new card content
-            prompt = get_generate_flashcard_from_word_prompt(card.word)
-            dprint(prompt)
-            flashcards = generate_flashcards(prompt)
-            dprint(flashcards)
-            new_card = flashcards.flashcards[0]
+            # Generate new card content only if needed
+            if needs_content_update:
+                prompt = get_generate_flashcard_from_word_prompt(card.word)
+                dprint(prompt)
+                flashcards = generate_flashcards(prompt)
+                dprint(flashcards)
+                new_card = flashcards.flashcards[0]
+            else:
+                # Use existing card data if only audio needs updating
+                new_card = card
 
             # Check if we need to update audio
-            need_audio = card.sample_usage != new_card.sample_usage
-            if need_audio:
+            need_sample_audio = (
+                force_update
+                or "Sample Usage (Audio)" not in fields
+                or not fields["Sample Usage (Audio)"]
+                or card.sample_usage != new_card.sample_usage
+            )
+            need_word_audio = (
+                force_update
+                or "Word (Audio)" not in fields
+                or not fields["Word (Audio)"]
+                or card.word != new_card.word
+            )
+
+            if need_sample_audio:
                 print("Sample usage changed, will regenerate audio:")
                 print(f"Old: {card.sample_usage}")
                 print(f"New: {new_card.sample_usage}")
 
+            if need_word_audio:
+                print("Word audio will be generated")
+
             if not dry_run:
-                # Only generate audio if sample usage changed
-                audio_filepath = (
-                    text_to_speech(new_card.sample_usage) if need_audio else None
-                )
+                # Generate audio files as needed
+                sample_usage_audio_filepath = None
+                word_audio_filepath = None
+
+                if need_sample_audio:
+                    sample_usage_audio_filepath = text_to_speech(new_card.sample_usage)
+
+                if need_word_audio:
+                    word_audio_filepath = text_to_speech(new_card.word)
+
                 ankiconnect_client.update_flashcard(
-                    card.anki_note_id, new_card, audio_filepath
+                    card.anki_note_id,
+                    new_card,
+                    sample_usage_audio_filepath=sample_usage_audio_filepath,
+                    word_audio_filepath=word_audio_filepath,
                 )
                 stats["updated"] += 1
-                if need_audio:
+                if need_sample_audio or need_word_audio:
                     stats["audio_updated"] += 1
             else:
                 print("Would update card with:")
                 print(new_card)
-                if need_audio:
-                    print("Would regenerate audio")
+                if need_sample_audio:
+                    print("Would regenerate sample usage audio")
+                if need_word_audio:
+                    print("Would regenerate word audio")
                 stats["updated"] += 1
-                if need_audio:
+                if need_sample_audio or need_word_audio:
                     stats["audio_updated"] += 1
         except Exception as e:
             print(f"Error processing card {card.word}: {e}")

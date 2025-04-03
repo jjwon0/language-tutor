@@ -156,15 +156,33 @@ class LanguageFlashcard(BaseModel):
     @classmethod
     def get_required_anki_fields(cls) -> List[str]:
         """Get list of required Anki note fields."""
-        fields = [
-            cls.ANKI_FIELD_NAMES[field]
-            for field in cls.model_fields
-            if field not in ["anki_note_id", "frequency"]
-            and field in cls.ANKI_FIELD_NAMES
-        ]
+        fields = [cls.ANKI_FIELD_NAMES[field] for field in cls.ANKI_FIELD_NAMES]
         fields.append("Sample Usage (Audio)")
         fields.append("Word (Audio)")
         return fields
+
+    @classmethod
+    def get_audio_fields(cls) -> List[str]:
+        """Get list of audio fields in Anki note.
+
+        Returns:
+            List of field names that contain audio
+        """
+        return [field for field in cls.get_required_anki_fields() if "(Audio)" in field]
+
+    @classmethod
+    def get_content_fields(cls) -> List[str]:
+        """Get list of content (non-audio) fields in Anki note.
+
+        Returns:
+            List of field names that contain content (not audio)
+        """
+        audio_fields = cls.get_audio_fields()
+        return [
+            field
+            for field in cls.get_required_anki_fields()
+            if field not in audio_fields
+        ]
 
     def __str__(self):
         """String representation of the flashcard.
