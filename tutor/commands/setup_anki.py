@@ -66,12 +66,8 @@ def setup_anki(languages: str):
 
                 flashcard_class = get_flashcard_class_for_language(language)
 
-                # Get the expected fields
-                expected_fields = list(flashcard_class.ANKI_FIELD_NAMES.values())
-                expected_fields.append("Sample Usage (Audio)")
-                expected_fields.append("Related Words")
+                expected_fields = flashcard_class.get_required_anki_fields()
 
-                # Get the actual fields
                 try:
                     note_fields = client.send_request(
                         AnkiAction.MODEL_FIELD_NAMES, {"modelName": model_name}
