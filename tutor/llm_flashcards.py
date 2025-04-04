@@ -130,8 +130,8 @@ def maybe_add_flashcards_to_deck(
 
             try:
                 # Generate audio for both the word and sample usage
-                sample_usage_audio_filepath = text_to_speech(f.sample_usage)
-                word_audio_filepath = text_to_speech(f.word)
+                sample_usage_audio_filepath = text_to_speech(f.sample_usage, f.LANGUAGE)
+                word_audio_filepath = text_to_speech(f.word, f.LANGUAGE)
 
                 # Add the flashcard with both audio files
                 note_id = ankiconnect_client.add_flashcard(

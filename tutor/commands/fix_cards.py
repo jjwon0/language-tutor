@@ -168,10 +168,14 @@ def _fix_cards_impl(
                 word_audio_filepath = None
 
                 if need_sample_audio:
-                    sample_usage_audio_filepath = text_to_speech(new_card.sample_usage)
+                    sample_usage_audio_filepath = text_to_speech(
+                        new_card.sample_usage, new_card.LANGUAGE
+                    )
 
                 if need_word_audio:
-                    word_audio_filepath = text_to_speech(new_card.word)
+                    word_audio_filepath = text_to_speech(
+                        new_card.word, new_card.LANGUAGE
+                    )
 
                 ankiconnect_client.update_flashcard(
                     card.anki_note_id,

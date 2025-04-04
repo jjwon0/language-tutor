@@ -70,7 +70,7 @@ def _regenerate_flashcard_impl(word: str, language: str = "mandarin") -> str:
     flashcards = generate_flashcards(prompt, language)
     dprint(flashcards)
     new_flashcard = flashcards.flashcards[0]
-    audio_filepath = text_to_speech(new_flashcard.sample_usage)
+    audio_filepath = text_to_speech(new_flashcard.sample_usage, language)
     ankiconnect_client.update_flashcard(note_id, new_flashcard, audio_filepath)
 
     return f"Updated! The new flashcard is below:\n{new_flashcard}"
