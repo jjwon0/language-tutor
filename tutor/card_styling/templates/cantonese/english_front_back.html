@@ -5,7 +5,10 @@
 <div class="chinese">
     <div class="chinese-word">{{Chinese}}</div>
     <div class="spacerSmall"></div>
-    <div class="jyutping">{{Jyutping}}</div>
+    <div class="pronunciation-row">
+        <div class="jyutping">{{Jyutping}}</div>
+        <div class="word-audio">{{Word (Audio)}}</div>
+    </div>
     <div class="spacerMedium"></div>
     <div class="notes">
         <strong>Sample Usage:</strong> {{Sample Usage}}
@@ -19,5 +22,7 @@
         <div class="related-words-content">{{Related Words}}</div>
     </div>
     {{/Related Words}}
-    <div class="audio">{{Sample Usage (Audio)}}</div>
+    <div class="audio">
+        <div class="sample-audio">{{Sample Usage (Audio)}}</div>
+    </div>
 </div>

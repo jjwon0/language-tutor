@@ -3,7 +3,10 @@
 <div style="border-bottom: 1px solid #ddd; width: 50%; margin: 0 auto;"></div>
 <div class="spacer"></div>
 <div class="english">
-    <div class="pinyin">{{Pinyin}}</div>
+    <div class="pronunciation-row">
+        <div class="pinyin">{{Pinyin}}</div>
+        <div class="word-audio">{{Word (Audio)}}</div>
+    </div>
     <div class="spacerSmall"></div>
     <div class="chinese">{{Chinese}}</div>
     <div class="spacerMedium"></div>
@@ -19,5 +22,7 @@
         <div class="related-words-content">{{Related Words}}</div>
     </div>
     {{/Related Words}}
-    <div class="audio">{{Sample Usage (Audio)}}</div>
+    <div class="audio">
+        <div class="sample-audio">{{Sample Usage (Audio)}}</div>
+    </div>
 </div>

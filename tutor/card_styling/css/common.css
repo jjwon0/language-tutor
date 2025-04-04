@@ -48,10 +48,44 @@
     cursor: pointer;
 }
 
+.replay-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Pronunciation row styling */
+.pronunciation-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.pronunciation-row .word-audio {
+    color: #3498db;
+    cursor: pointer;
+}
+
+.pronunciation-row .word-audio:hover {
+    color: #2980b9;
+}
+
+.pronunciation-row .word-audio svg {
+    margin-bottom: 4px;
+}
+
 /* Spacing utilities */
-.spacer { height: 20px; }
-.spacerSmall { height: 5px; }
-.spacerMedium { height: 15px; }
+.spacer {
+    height: 20px;
+}
+
+.spacerSmall {
+    height: 5px;
+}
+
+.spacerMedium {
+    height: 15px;
+}
 
 /* Related words section */
 .related-words {
