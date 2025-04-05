@@ -1,6 +1,6 @@
-# chinese-tutor
+# language-tutor
 
-A CLI tool to help generate and manage Chinese language flashcards in Anki.
+A CLI tool to help generate and manage language flashcards in Anki.
 
 ## Setup
 
@@ -50,10 +50,12 @@ A CLI tool to help generate and manage Chinese language flashcards in Anki.
    ./ct config --deck "Your::Deck::Name" --language "cantonese" --learner-level "beginner"
    ```
 
-4. **OpenAI Setup**
+4. **Setup**
    Create a `.env` file in the project root:
    ```
    OPENAI_API_KEY=your-api-key-here
+   AZURE_SPEECH_SERVICE_KEY=your-azure-speech-service-key
+   AZURE_SPEECH_SERVICE_REGION=your-azure-speech-service-region
    ```
 
 ## Usage
@@ -77,12 +79,12 @@ View all commands:
 
 1. Install development dependencies:
    ```bash
-   pip install -r requirements-dev.txt
+   poetry install
    ```
 
 2. Install pre-commit hooks:
    ```bash
-   pre-commit install
+   poetry run pre-commit install
    ```
 
 ## Future Plans
