@@ -18,7 +18,7 @@ repos:
         pass_filenames: false
         always_run: true
         types: [python]
-        stages: [commit]
+        stages: [pre-commit]
 
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
