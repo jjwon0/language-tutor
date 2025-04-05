@@ -6,16 +6,12 @@ A CLI tool to help generate and manage Chinese language flashcards in Anki.
 
 1. **Prerequisites**
    - Install Anki and the AnkiConnect extension
-   - Python with virtualenv/pyenv
+   - Python with Poetry installed
 
 2. **Installation**
    ```bash
-   # Create and activate a virtualenv (using your preferred method)
-   python -m venv venv
-   source venv/bin/activate  # or `venv\Scripts\activate` on Windows
-
    # Install dependencies
-   pip install -r requirements.txt
+   poetry install
    ```
 
 3. **Configuration**

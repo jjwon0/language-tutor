@@ -1,17 +1,35 @@
-[build-system]
-requires = ["setuptools>=42", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
-name = "chinese-tutor"
-version = "0.1.0"
-description = "A tool for learning Chinese with flashcards and related words"
+name = "tutor"
+version = "0.0.1"
+description = ""
+authors = [
+    {name = "Jason Won",email = "jason.j.won@gmail.com"}
+]
 readme = "README.md"
-requires-python = ">=3.8"
-license = {text = "MIT"}
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "openai (>=1.70.0,<2.0.0)",
+    "pydantic (>=2.11.2,<3.0.0)",
+    "python-dotenv (>=1.1.0,<2.0.0)",
+    "pyyaml (>=6.0.2,<7.0.0)",
+    "requests (>=2.32.3,<3.0.0)",
+    "click (>=8.1.8,<9.0.0)",
+    "opencc (>=1.1.9,<2.0.0)",
+    "azure-cognitiveservices-speech (>=1.43.0,<2.0.0)",
+    "flask (>=3.1.0,<4.0.0)",
+    "flask-cors (>=5.0.1,<6.0.0)",
+    "pytest (>=8.3.5,<9.0.0)"
+]
 
-[tool.pytest]
-testpaths = ["tests"]
-python_files = "test_*.py"
-python_classes = "Test*"
-python_functions = "test_*"
+[tool.poetry]
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.2.0"
+ruff = "^0.11.4"
+
+[tool.poetry.scripts]
+ct = "tutor.cli:main"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

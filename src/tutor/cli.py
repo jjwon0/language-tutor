@@ -32,7 +32,7 @@ load_dotenv()
     default=False,
     help="Skip confirmation for commands",
 )
-def cli(model: str, debug: bool, skip_confirm: bool) -> None:
+def main(model: str, debug: bool, skip_confirm: bool) -> None:
     """chinese-tutor tool"""
     set_model(model)
     set_debug(debug)
@@ -40,20 +40,20 @@ def cli(model: str, debug: bool, skip_confirm: bool) -> None:
 
 
 # Add generate_flashcard_from_word command and shortcut
-cli.add_command(generate_flashcard_from_word, name="generate-flashcard-from-word")
-cli.add_command(generate_flashcard_from_word, name="g")
+main.add_command(generate_flashcard_from_word, name="generate-flashcard-from-word")
+main.add_command(generate_flashcard_from_word, name="g")
 
 
 # Add regenerate_flashcard command and shortcut
-cli.add_command(regenerate_flashcard, name="regenerate-flashcard")
-cli.add_command(regenerate_flashcard, name="rg")
+main.add_command(regenerate_flashcard, name="regenerate-flashcard")
+main.add_command(regenerate_flashcard, name="rg")
 
 
 # Add commands
-cli.add_command(run_web, name="web")
-cli.add_command(setup_anki, name="setup-anki")
-cli.add_command(fix_cards, name="fix-cards")
-cli.add_command(list_lesser_known_cards, name="list-lesser-known-cards")
-cli.add_command(generate_topics_prompt, name="generate-topics-prompt")
-cli.add_command(select_conversation_topic, name="select-conversation-topic")
-cli.add_command(config, name="config")
+main.add_command(run_web, name="web")
+main.add_command(setup_anki, name="setup-anki")
+main.add_command(fix_cards, name="fix-cards")
+main.add_command(list_lesser_known_cards, name="list-lesser-known-cards")
+main.add_command(generate_topics_prompt, name="generate-topics-prompt")
+main.add_command(select_conversation_topic, name="select-conversation-topic")
+main.add_command(config, name="config")
